@@ -15,11 +15,18 @@ export const CREATOR_PERMITTED_ACTIONS = [
   "panoramas:upload",
 ] as const;
 
+export type ExperienceIdentity = {
+  name: string;
+  external_resource_id: string;
+  external_customer_id?: string;
+};
+
 export type PartnerExperience = {
   experience_id: string;
   public_id: string;
   name: string;
   external_resource_id: string;
+  external_customer_id?: string | null;
   lifecycle_status: string;
   publication_status: "unpublished" | "published";
   draft_revision: number;
@@ -130,28 +137,44 @@ export function createPartnerClient(options: PartnerClientOptions = {}) {
       return config;
     },
 
-    async createOrResolveExperience(): Promise<PartnerExperience> {
+    async createOrResolveExperience(
+      identity: ExperienceIdentity = {
+        name: property.name,
+        external_resource_id: property.externalListingKey,
+      },
+    ): Promise<PartnerExperience> {
       const result = await request<PartnerExperience>(
         "POST",
         "/api/v1/360/experiences",
         {
           idempotent: true,
           body: {
-            name: property.name,
-            external_resource_id: property.externalListingKey,
+            name: identity.name,
+            external_resource_id: identity.external_resource_id,
+            ...(identity.external_customer_id
+              ? { external_customer_id: identity.external_customer_id }
+              : {}),
           },
         },
       );
       return result.data;
     },
 
-    async getExperienceByExternalId(): Promise<PartnerExperience | null> {
+    async getExperienceByExternalId(
+      identity: Pick<
+        ExperienceIdentity,
+        "external_resource_id" | "external_customer_id"
+      > = { external_resource_id: property.externalListingKey },
+    ): Promise<PartnerExperience | null> {
       if (!config.configured) return null;
 
       const query = new URLSearchParams({
-        external_resource_id: property.externalListingKey,
+        external_resource_id: identity.external_resource_id,
         limit: "1",
       });
+      if (identity.external_customer_id) {
+        query.set("external_customer_id", identity.external_customer_id);
+      }
       const result = await request<{ items: PartnerExperience[] }>(
         "GET",
         `/api/v1/360/experiences?${query.toString()}`,

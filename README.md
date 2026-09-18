@@ -1,12 +1,17 @@
 # ArchWalk 360 reference application
 
-This is a small fictional property platform (Reference Realty) with ArchWalk 360 embedded on the seller and public listing pages.
+This is a small fictional property platform (Reference Realty) with ArchWalk 360
+embedded as a capability, not as ArchWalk Manager.
 
-- `/editor` — seller workspace with the embedded Creator
+- `/editor` — seller workspace with the embedded Creator (`Sunset Villa`)
 - `/viewer` — customer marketplace listing with Photos ↔ 360° Tour
+- `/plugin` — Blue Lagoon resort dashboard: 200 imported rooms → 8 visual variants → 8 ArchWalk Experiences, with Embedded Creator on the same page
+- `/plugin/rooms/101` — guest room page for a physical room (101 and 102 share Deluxe King)
 - `/` redirects to `/editor`
 
-Both pages share one hardcoded listing (`Sunset Villa`, external key `sunset-villa-001`). There is no database, partner authentication, or CMS.
+Sunset Villa uses external key `sunset-villa-001`. Blue Lagoon variants use
+`external_customer_id=blue_lagoon` and `external_resource_id=room_type_<variant>`.
+There is no database, partner authentication, or CMS.
 
 ## Running locally
 
@@ -27,7 +32,17 @@ Server-side only (never prefix these with `NEXT_PUBLIC_`):
 | `ARCHWALK_API_BASE` | Partner API host, no trailing slash |
 | `ARCHWALK_APP_ORIGIN` | ArchWalk app origin for Creator/Viewer iframes |
 | `AW360_API_KEY` | Partner API key (`aw360_sk_…`) |
-| `APP_ORIGIN` | This app’s origin, used when minting Creator sessions |
+| `APP_ORIGIN` | This app’s origin (`http://localhost:3001` locally), used when minting Creator sessions |
+
+Local topology:
+
+- ArchWalk backend: `8000`
+- ArchWalk Creator / Viewer: `3000`
+- This Reference App: `3001` → [http://localhost:3001/plugin](http://localhost:3001/plugin)
+
+`AW360_API_KEY` stays on the Next.js server. Browser JS only receives Experience/publication data and short-lived Creator session tokens for the iframe handshake.
+
+Opening `/plugin` automatically create-or-resolves one Experience per visual variant. There is no “create 8 Experiences” button.
 
 ## ArchWalk setup
 
@@ -37,7 +52,9 @@ Server-side only (never prefix these with `NEXT_PUBLIC_`):
 4. Issue a Partner API credential with at least: `experiences:read`, `experiences:write`, `experiences:publish`, `panoramas:read`, `panoramas:write`, `panoramas:upload`, `creator_sessions:issue`.
 5. Store the raw key immediately; it is shown once.
 
-To reuse content already created in ArchWalk, open that Standalone Experience in the Organization's `/archwalk-360` library and choose **Connect to integration**. Select this Integration and enter the exact external resource ID `sunset-villa-001` (the listing key in `src/lib/property.ts`). This binds the same Experience; its Panoramas, draft, publication, and `public_id` remain in place. Opening `/editor` then resolves it through the normal Partner create-or-resolve call and the embedded Creator loads its existing Panoramas. The `/viewer` listing keeps the same published public Viewer. If no Experience was connected under that key, the reference app can still create one through the Partner API.
+To reuse Sunset Villa content already created in ArchWalk, open that Standalone Experience in the Organization's `/archwalk-360` library and choose **Connect to integration**. Select this Integration and enter the exact external resource ID `sunset-villa-001` (the listing key in `src/lib/property.ts`). This binds the same Experience; its Panoramas, draft, publication, and `public_id` remain in place. Opening `/editor` then resolves it through the normal Partner create-or-resolve call and the embedded Creator loads its existing Panoramas. The `/viewer` listing keeps the same published public Viewer. If no Experience was connected under that key, the reference app can still create one through the Partner API.
+
+Blue Lagoon room types use the same Connect flow with `external_resource_id` values such as `room_type_deluxe_king` and customer `blue_lagoon`. Rooms 101 and 102 both resolve that Deluxe King identity.
 
 ## Tests
 

@@ -15,6 +15,12 @@ export default function EditorPage() {
           <p className="text-sm font-medium tracking-wide text-foreground">
             Reference Realty
           </p>
+          <Link
+            href="/plugin"
+            className="min-h-11 inline-flex items-center text-sm text-muted hover:text-accent"
+          >
+            Resort 360
+          </Link>
         </div>
       </header>
 

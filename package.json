@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "tsx --test src/lib/archwalk/*.test.ts",
+    "test": "tsx --test src/lib/archwalk/*.test.ts src/lib/plugin/*.test.ts",
     "test:e2e": "playwright test",
     "test:integration": "playwright test --config playwright.integration.config.ts"
   },
