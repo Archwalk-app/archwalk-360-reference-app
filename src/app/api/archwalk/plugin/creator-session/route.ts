@@ -1,3 +1,4 @@
+import { requireDemoApi } from "@/lib/demo-auth";
 import { createPartnerClient } from "@/lib/archwalk/client";
 import { parentOriginFromRequest } from "@/lib/archwalk/env";
 import { PartnerApiError, publicErrorMessage } from "@/lib/archwalk/errors";
@@ -13,6 +14,8 @@ function json(body: unknown, status = 200) {
 }
 
 export async function POST(request: Request) {
+  const denied = requireDemoApi(request);
+  if (denied) return denied;
   const client = createPartnerClient();
   if (!client.config.configured) {
     return json(

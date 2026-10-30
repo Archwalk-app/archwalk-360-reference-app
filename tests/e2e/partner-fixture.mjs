@@ -4,6 +4,7 @@ import { createServer } from "node:http";
 let listingState = "published";
 const experiences = new Map();
 let experienceSeq = 0;
+let partnerCalls = 0;
 
 function send(response, status, body, headers = {}) {
   const json = typeof body === "string" ? body : JSON.stringify(body);
@@ -52,6 +53,8 @@ createServer(async (request, response) => {
     response.end("ok");
     return;
   }
+  if (url.pathname === "/fixture-metrics") {send(response, 200, {partnerCalls}); return;}
+  if (url.pathname.startsWith("/api/v1/360/")) partnerCalls++;
   if (url.pathname === "/health") {
     response.end("ok");
     return;

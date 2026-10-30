@@ -1,3 +1,5 @@
+import { requireDemoPage } from "@/lib/demo-page-auth";
+import { DemoNavigation } from "../demo-navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CreatorEmbed } from "./creator-embed";
@@ -12,6 +14,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 export default async function EditorPage() {
+  await requireDemoPage("/editor");
   const config = createMuseumClient().config;
   let connected = false;
   if (config.configured) {
@@ -25,6 +28,9 @@ export default async function EditorPage() {
   return (
     <div className="museum-site">
       <MuseumHeader />
+      <div className="museum-container pt-3">
+        <DemoNavigation />
+      </div>
       <main className="museum-container py-10">
         <div data-editor-intro className="max-w-3xl">
           <p className="museum-eyebrow">Curator demo workspace</p>

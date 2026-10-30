@@ -703,3 +703,14 @@ body {
     transition: none !important;
   }
 }
+
+@media (max-width: 640px) {
+  .museum-header-inner {
+    flex-wrap: wrap;
+    padding-block: 16px;
+  }
+  .museum-header nav {
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+}

@@ -1,5 +1,13 @@
 import { expect, test } from "@playwright/test";
 
+test.beforeEach(async ({ page }) => {
+  const response = await page.request.post("/api/demo/login", {
+    data: { password: "demo-test-password-only" },
+    headers: { Origin: "http://127.0.0.1:3002" },
+  });
+  expect(response.ok()).toBe(true);
+});
+
 test("plugin dashboard maps 200 rooms to 8 variants without leaking the API key", async ({
   page,
 }) => {
@@ -10,7 +18,9 @@ test("plugin dashboard maps 200 rooms to 8 variants without leaking the API key"
     }
   });
   await page.goto("/plugin");
-  await expect(page.getByRole("heading", { name: "Blue Lagoon Resort" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Blue Lagoon Resort" }),
+  ).toBeVisible();
   await expect(page.getByText("200 rooms imported")).toBeVisible();
   await expect(page.getByText("8 visual variants")).toBeVisible();
   await expect(page.getByRole("button", { name: "Edit 360" })).toHaveCount(8);
@@ -29,16 +39,26 @@ test("Edit 360 uses the Creator handshake and publish updates Deluxe King", asyn
   await page.getByRole("button", { name: "Edit 360" }).first().click();
   const iframe = page.locator("iframe[title='ArchWalk 360 Creator']");
   await expect(iframe).toBeVisible();
-  await expect(iframe).toHaveAttribute("src", /\/aw360\/c\/sess_room_type_deluxe_king$/);
+  await expect(iframe).toHaveAttribute(
+    "src",
+    /\/aw360\/c\/sess_room_type_deluxe_king$/,
+  );
   await expect(iframe).not.toHaveAttribute("src", /aw360_cs_|token=/);
   await expect
     .poll(async () => page.locator("table tbody tr").first().textContent())
     .toMatch(/Draft|Published/);
-  await page.frameLocator("iframe[title='ArchWalk 360 Creator']").getByRole("button", {
-    name: "Publish demo",
-  }).click();
-  await expect(page.locator("table tbody tr").first()).toContainText("Published");
-  await expect(page.getByRole("link", { name: "View 360" }).first()).toBeVisible();
+  await page
+    .frameLocator("iframe[title='ArchWalk 360 Creator']")
+    .getByRole("button", {
+      name: "Publish demo",
+    })
+    .click();
+  await expect(page.locator("table tbody tr").first()).toContainText(
+    "Published",
+  );
+  await expect(
+    page.getByRole("link", { name: "View 360" }).first(),
+  ).toBeVisible();
 });
 
 test("rooms 101 and 102 share the Deluxe King Viewer after publish", async ({
@@ -46,10 +66,15 @@ test("rooms 101 and 102 share the Deluxe King Viewer after publish", async ({
 }) => {
   await page.goto("/plugin");
   await page.getByRole("button", { name: "Edit 360" }).first().click();
-  await page.frameLocator("iframe[title='ArchWalk 360 Creator']").getByRole("button", {
-    name: "Publish demo",
-  }).click();
-  await expect(page.locator("table tbody tr").first()).toContainText("Published");
+  await page
+    .frameLocator("iframe[title='ArchWalk 360 Creator']")
+    .getByRole("button", {
+      name: "Publish demo",
+    })
+    .click();
+  await expect(page.locator("table tbody tr").first()).toContainText(
+    "Published",
+  );
 
   await page.goto("/plugin/rooms/101");
   const first = page.locator("iframe[title='ArchWalk 360 Viewer']");
@@ -65,7 +90,9 @@ test("rooms 101 and 102 share the Deluxe King Viewer after publish", async ({
 
 test("unconfigured host still shows imported inventory", async ({ page }) => {
   await page.goto("http://127.0.0.1:3003/plugin");
-  await expect(page.getByRole("heading", { name: "Blue Lagoon Resort" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Blue Lagoon Resort" }),
+  ).toBeVisible();
   await expect(page.getByText("200 rooms imported")).toBeVisible();
   await expect(page.getByRole("button", { name: "Edit 360" })).toHaveCount(8);
   await expect(page.locator("iframe")).toHaveCount(0);

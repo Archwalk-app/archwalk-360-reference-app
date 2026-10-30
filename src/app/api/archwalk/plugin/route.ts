@@ -1,7 +1,11 @@
+import { requireDemoApi } from "@/lib/demo-auth";
 import { createPartnerClient } from "@/lib/archwalk/client";
 import { PartnerApiError, publicErrorMessage } from "@/lib/archwalk/errors";
 import { buildPluginInventory } from "@/lib/plugin/inventory";
-import { syncPluginInventory, unsyncedPluginInventory } from "@/lib/plugin/sync";
+import {
+  syncPluginInventory,
+  unsyncedPluginInventory,
+} from "@/lib/plugin/sync";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +15,9 @@ function json(body: unknown, status = 200) {
   return Response.json(body, { status, headers: NO_STORE });
 }
 
-export async function GET() {
+export async function POST(request: Request) {
+  const denied = requireDemoApi(request);
+  if (denied) return denied;
   const inventory = buildPluginInventory();
   const client = createPartnerClient();
   if (!client.config.configured) {

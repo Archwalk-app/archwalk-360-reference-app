@@ -1,8 +1,11 @@
+import { createDemoSession, demoCookieName } from "../demo-auth";
 import assert from "node:assert/strict";
 import { it } from "node:test";
 import { POST } from "../../app/api/archwalk/creator-session/route";
 import { HALLWYL_EXPERIENCE_ID, HALLWYL_PUBLIC_ID } from "./museum.server";
 const config = {
+  DEMO_ACCESS_PASSWORD: "unit-test-password-only",
+  DEMO_SESSION_SECRET: "unit-test-signing-secret-with-at-least-32-chars",
   ARCHWALK_API_BASE: "https://blue.example",
   ARCHWALK_APP_ORIGIN: "https://blue-app.example",
   AW360_API_KEY: "test-blue-secret",
@@ -69,6 +72,10 @@ for (const state of [
       const response = await POST(
         new Request(config.APP_ORIGIN + "/api/archwalk/creator-session", {
           method: "POST",
+          headers: {
+            origin: config.APP_ORIGIN,
+            cookie: `${demoCookieName()}=${createDemoSession()}`,
+          },
         }),
       );
       const body = await response.json();

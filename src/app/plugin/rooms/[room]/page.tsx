@@ -1,3 +1,5 @@
+import { requireDemoPage } from "@/lib/demo-page-auth";
+import { DemoNavigation } from "../../../demo-navigation";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ViewerEmbed } from "@/app/viewer/viewer-embed";
@@ -17,6 +19,7 @@ export default async function PluginRoomPage({
   params: Promise<{ room: string }>;
 }) {
   const { room } = await params;
+  await requireDemoPage(`/plugin/rooms/${encodeURIComponent(room)}`);
   const found = findPluginRoom(buildPluginInventory(), room);
   if (!found) notFound();
 
@@ -26,12 +29,11 @@ export default async function PluginRoomPage({
 
   if (client.config.configured) {
     try {
-      const experience = await client.createOrResolveExperience({
-        name: found.variant.name,
+      const experience = await client.getExperienceByExternalId({
         external_resource_id: found.variant.external_resource_id,
         external_customer_id: found.variant.external_customer_id,
       });
-      if (experience.publication_status === "published") {
+      if (experience?.publication_status === "published") {
         embedUrl = viewerIframeSrc(
           client.config.appOrigin,
           experience.public_id,
@@ -48,16 +50,25 @@ export default async function PluginRoomPage({
   return (
     <div className="flex min-h-full flex-col">
       <header className="border-b border-border bg-surface/80">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-5 sm:px-8">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-5 sm:px-8">
           <Link href="/plugin" className="font-serif text-2xl tracking-tight">
             Reference Realty<span className="text-accent">.</span>
           </Link>
-          <p className="text-xs text-muted sm:text-sm">{PLUGIN_RESORT.name}</p>
+          <div>
+            <p className="text-xs text-muted sm:text-sm">
+              {PLUGIN_RESORT.name}
+            </p>
+            <DemoNavigation />
+          </div>
         </div>
       </header>
       <main className="mx-auto w-full max-w-7xl flex-1 px-5 pb-12 pt-7 sm:px-8 sm:pt-9">
         <p className="text-xs text-muted">
-          Guest room <span aria-hidden className="mx-2">/</span> {found.variant.name}
+          Guest room{" "}
+          <span aria-hidden className="mx-2">
+            /
+          </span>{" "}
+          {found.variant.name}
         </p>
         <h1 className="mt-4 font-serif text-4xl tracking-tight sm:text-5xl">
           Room {found.room.room_number}

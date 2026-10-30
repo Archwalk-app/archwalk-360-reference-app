@@ -31,3 +31,9 @@ Keep the existing `ARCHWALK_API_BASE`, `ARCHWALK_APP_ORIGIN` and `AW360_API_KEY`
 ## Existing embedding behavior
 
 Both iframes retain `allow="fullscreen"` and `allowFullScreen`. The Creator handshake passes only its short-lived session token to the trusted iframe origin, never in its URL. The partner host controls the iframe footprint; this change does not remount or modify the ArchWalk runtime. Photos unmount the Viewer iframe to release rendering resources.
+
+## Shared demo access
+
+Set server-only `DEMO_ACCESS_PASSWORD` (at least 12 characters) and an independent random `DEMO_SESSION_SECRET` (at least 32 characters). Generate the secret locally with `node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'))"`; never commit either value. Missing/weak configuration fails closed, including in development. `APP_ORIGIN` must match the browser origin for login and authenticated writes.
+
+One signed HttpOnly session lasts eight hours across both demos. Changing either credential invalidates sessions. Logout clears the browser session. Museum exhibition and credits stay public. Hotel inventory sync/publication operations now require authenticated same-origin POSTs; room-page GETs only look up existing Experiences. Login is limited to ten attempts per 15 minutes per trusted hosting IP (one shared bucket locally), with bounded per-instance memory. This is best-effort across serverless instances; use owner-managed platform rate limiting for a distributed limit. No Vercel settings are changed by this implementation.

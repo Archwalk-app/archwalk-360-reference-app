@@ -1,10 +1,19 @@
+import { createDemoSession, demoCookieName } from "../demo-auth";
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { GET } from "../../app/api/archwalk/plugin/route";
+import { POST } from "../../app/api/archwalk/plugin/route";
 import { POST as mintPluginSession } from "../../app/api/archwalk/plugin/creator-session/route";
-import { GET as getPublication } from "../../app/api/archwalk/plugin/publication/route";
+import { POST as getPublication } from "../../app/api/archwalk/plugin/publication/route";
 
+function authHeaders() {
+  return {
+    origin: "http://localhost:3001",
+    cookie: `${demoCookieName()}=${createDemoSession()}`,
+  };
+}
 const env = {
+  DEMO_ACCESS_PASSWORD: "unit-test-password-only",
+  DEMO_SESSION_SECRET: "unit-test-signing-secret-with-at-least-32-chars",
   ARCHWALK_API_BASE: "https://api.archwalk.example",
   ARCHWALK_APP_ORIGIN: "https://app.archwalk.example",
   AW360_API_KEY: "aw360_sk_cred.testsecret",
@@ -43,7 +52,12 @@ describe("plugin Partner routes", () => {
     }) as typeof fetch;
 
     try {
-      const response = await GET();
+      const response = await POST(
+        new Request("http://localhost:3001/api/archwalk/plugin", {
+          method: "POST",
+          headers: authHeaders(),
+        }),
+      );
       const body = (await response.json()) as {
         physical_room_count: number;
         visual_variant_count: number;
@@ -96,14 +110,14 @@ describe("plugin Partner routes", () => {
 
     try {
       const response = await mintPluginSession(
-        new Request("http://localhost:3001/api/archwalk/plugin/creator-session", {
-          method: "POST",
-          headers: {
-            origin: "http://localhost:3001",
-            "content-type": "application/json",
+        new Request(
+          "http://localhost:3001/api/archwalk/plugin/creator-session",
+          {
+            method: "POST",
+            headers: { ...authHeaders(), "content-type": "application/json" },
+            body: JSON.stringify({ variantId: "deluxe_king" }),
           },
-          body: JSON.stringify({ variantId: "deluxe_king" }),
-        }),
+        ),
       );
       const body = (await response.json()) as {
         creatorUrl: string;
@@ -112,7 +126,10 @@ describe("plugin Partner routes", () => {
       };
       assert.equal(response.status, 200);
       assert.equal(response.headers.get("Cache-Control"), "no-store");
-      assert.equal(body.creatorUrl, "https://app.archwalk.example/aw360/c/sess_plugin");
+      assert.equal(
+        body.creatorUrl,
+        "https://app.archwalk.example/aw360/c/sess_plugin",
+      );
       assert.equal(body.creatorUrl.includes(body.token), false);
       assert.equal(body.experienceId, "exp_deluxe");
       assert.equal(JSON.stringify(body).includes("aw360_sk_"), false);
@@ -138,10 +155,16 @@ describe("plugin Partner routes", () => {
 
     try {
       const first = await getPublication(
-        new Request("http://localhost:3001/api/archwalk/plugin/publication?room=101"),
+        new Request(
+          "http://localhost:3001/api/archwalk/plugin/publication?room=101",
+          { method: "POST", headers: authHeaders() },
+        ),
       );
       const second = await getPublication(
-        new Request("http://localhost:3001/api/archwalk/plugin/publication?room=102"),
+        new Request(
+          "http://localhost:3001/api/archwalk/plugin/publication?room=102",
+          { method: "POST", headers: authHeaders() },
+        ),
       );
       const a = (await first.json()) as {
         public_id: string;

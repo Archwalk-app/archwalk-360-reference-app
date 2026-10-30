@@ -53,7 +53,7 @@ export function PluginWorkspace() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/archwalk/plugin", { cache: "no-store" })
+    fetch("/api/archwalk/plugin", { method: "POST", cache: "no-store" })
       .then(async (response) => {
         const body = (await response.json()) as PluginPayload;
         if (cancelled) return;
@@ -100,7 +100,9 @@ export function PluginWorkspace() {
         throw new Error(body.error ?? "Unable to start the 360 editor.");
       }
       if (tokenAppearsInUrl(body.creatorUrl, body.token)) {
-        throw new Error("Creator session token must not appear in the iframe URL.");
+        throw new Error(
+          "Creator session token must not appear in the iframe URL.",
+        );
       }
       tokenRef.current = body.token;
       originRef.current = body.creatorOrigin;
@@ -117,9 +119,13 @@ export function PluginWorkspace() {
                   experience_id: body.experienceId,
                   publication_status: body.publicationStatus,
                   public_id:
-                    body.publicationStatus === "published" ? body.publicId : null,
+                    body.publicationStatus === "published"
+                      ? body.publicId
+                      : null,
                   status:
-                    body.publicationStatus === "published" ? "Published" : "Draft",
+                    body.publicationStatus === "published"
+                      ? "Published"
+                      : "Draft",
                   ok: true,
                 }
               : row,
@@ -309,7 +315,8 @@ export function PluginWorkspace() {
                     >
                       Edit 360
                     </button>
-                    {variant.status === "Published" && variant.sample_rooms[0] ? (
+                    {variant.status === "Published" &&
+                    variant.sample_rooms[0] ? (
                       <Link
                         href={`/plugin/rooms/${variant.sample_rooms[0]}`}
                         className="ml-2 inline-flex min-h-11 items-center rounded-full border border-border px-3 text-xs font-medium hover:text-accent"
@@ -327,11 +334,17 @@ export function PluginWorkspace() {
         {deluxe ? (
           <p className="mt-4 text-sm text-muted">
             Guest rooms{" "}
-            <Link className="underline underline-offset-4 hover:text-accent" href="/plugin/rooms/101">
+            <Link
+              className="underline underline-offset-4 hover:text-accent"
+              href="/plugin/rooms/101"
+            >
               101
             </Link>
             {" · "}
-            <Link className="underline underline-offset-4 hover:text-accent" href="/plugin/rooms/102">
+            <Link
+              className="underline underline-offset-4 hover:text-accent"
+              href="/plugin/rooms/102"
+            >
               102
             </Link>{" "}
             reuse the Deluxe King experience.

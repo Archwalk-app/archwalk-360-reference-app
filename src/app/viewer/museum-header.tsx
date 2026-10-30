@@ -17,6 +17,7 @@ export function MuseumHeader() {
           <Link href="/viewer#rooms">The rooms</Link>
           <Link href="/viewer#about">The story</Link>
           <Link href="/viewer/credits">Credits</Link>
+          <Link href="/plugin">Hotel demo</Link>
         </nav>
       </div>
     </header>

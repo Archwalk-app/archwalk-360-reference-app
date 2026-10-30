@@ -1,3 +1,4 @@
+import { requireDemoApi } from "@/lib/demo-auth";
 import { parentOriginFromRequest } from "@/lib/archwalk/env";
 import { PartnerApiError, publicErrorMessage } from "@/lib/archwalk/errors";
 import { creatorIframeSrc } from "@/lib/archwalk/protocol";
@@ -21,6 +22,8 @@ function sessionJson(
 }
 
 export async function POST(request: Request) {
+  const denied = requireDemoApi(request);
+  if (denied) return denied;
   const client = createMuseumClient();
   if (!client.config.configured) {
     return sessionJson(
