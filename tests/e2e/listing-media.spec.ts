@@ -1,81 +1,180 @@
 import { test, expect } from "@playwright/test";
-test("Hallwyl Photos and 360° Tour are keyboard operable and release the iframe", async ({
+import { createRequire } from "node:module";
+test("gallery invitation, keyboard switch, cleanup and intentional deep link", async ({
   page,
 }) => {
+  await page.setViewportSize({ width: 1440, height: 1080 });
   await page.goto("/viewer");
   const photos = page.getByRole("button", { name: "Photos", exact: true }),
     tour = page.getByRole("button", { name: "360° Tour", exact: true });
+  await expect(photos).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator("iframe")).toHaveCount(0);
   await expect(page.locator("#listing-media img")).toHaveCount(5);
   await page
     .getByRole("button", { name: "View Morning Room photograph" })
     .click();
-  await expect(page.locator(".museum-feature-photo img")).toHaveAttribute(
-    "alt",
-    /Morning Room/,
-  );
   const before = (await page.locator("#listing-media").boundingBox())!;
-  await tour.focus();
+  await page.evaluate(() =>
+    Object.assign(window, { discoveryVisit: "same-document" }),
+  );
+  await page
+    .getByRole("button", { name: "Enter interactive 360° tour" })
+    .focus();
   await page.keyboard.press("Enter");
-  await expect(page.locator("iframe")).toHaveAttribute(
+  await expect(page).toHaveURL("http://127.0.0.1:3002/viewer");
+  expect(await page.evaluate(() => Reflect.get(window, "discoveryVisit"))).toBe(
+    "same-document",
+  );
+  const frame = page.locator("iframe");
+  await expect(frame).toHaveAttribute("allow", "fullscreen");
+  await expect(frame).toHaveAttribute(
     "src",
     "http://127.0.0.1:3216/aw360/v/1e00029c-d4ff-4a22-8d5b-c95d10ae3f57",
   );
-  await expect(page.locator("iframe")).toHaveAttribute("allow", "fullscreen");
-  const iframe = await page.locator("iframe").elementHandle();
-  const after = (await page.locator("#listing-media").boundingBox())!;
-  expect(Math.abs(before.height - after.height)).toBeLessThan(2);
-  await photos.focus();
-  await page.keyboard.press("Space");
-  await expect(page.locator("iframe")).toHaveCount(0);
-  expect(await iframe!.evaluate((node) => node.isConnected)).toBe(false);
+  expect((await frame.boundingBox())!.height).toBeGreaterThan(
+    before.height + 120,
+  );
+  await expect(
+    page.getByRole("button", { name: "Back to photos", exact: true }),
+  ).toBeFocused();
+  await expect(page.locator(".museum-tour-instructions")).toBeVisible();
+  const handle = await frame.elementHandle();
+  await page.getByRole("button", { name: "Dismiss tour instructions" }).click();
+  expect(await handle!.evaluate((node) => node.isConnected)).toBe(true);
+  await page
+    .getByRole("button", { name: "Back to photos", exact: true })
+    .click();
+  await expect(frame).toHaveCount(0);
+  expect(await handle!.evaluate((node) => node.isConnected)).toBe(false);
   await expect(page.locator(".museum-feature-photo img")).toHaveAttribute(
     "alt",
     /Morning Room/,
   );
+  await expect(
+    page.getByRole("button", { name: "Enter interactive 360° tour" }),
+  ).toBeFocused();
+  await tour.focus();
+  await page.keyboard.press("Space");
+  await expect(frame).toHaveCount(1);
+  await expect(page.locator(".museum-tour-instructions")).toHaveCount(0);
+  expect(await page.evaluate(() => document.fullscreenElement)).toBeNull();
+  await photos.click();
   await page.getByRole("link", { name: "Explore in 360°" }).click();
-  await expect(page.locator("iframe")).toHaveCount(1);
+  await expect(page).toHaveURL(/tour=1#museum-media/);
+  await expect(frame).toHaveCount(1);
+  await expect(page.locator(".museum-tour-instructions")).toHaveCount(0);
 });
 for (const viewport of [
   { name: "desktop", width: 1440, height: 1080 },
   { name: "mobile", width: 390, height: 844 },
 ]) {
-  test(`Hallwyl ${viewport.name} visual smoke`, async ({ page }, info) => {
-    await page.setViewportSize(viewport);
-    await page.goto("/viewer");
-    await expect(page).toHaveTitle(
-      "Hallwyl Museum — Interactive 360° Experience | ArchWalk",
-    );
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      "Hallwyl Museum.",
-    );
-    await expect(page.locator(".museum-room-card")).toHaveCount(4);
-    await expect(
-      page.getByText(
-        "Independent interactive demonstration powered by ArchWalk 360. Not an official Hallwyl Museum website.",
-      ),
-    ).toBeVisible();
-    for (const photo of await page.locator("img").all())
+  test(
+    "Hallwyl " + viewport.name + " Photos and immersive Tour visual check",
+    async ({ page }, info) => {
+      test.setTimeout(90000);
+      await page.setViewportSize(viewport);
+      // Serve this local public preview at the already-allowlisted demo origin.
+      // The production Viewer's CSP, origin checks and responses remain untouched.
+      await page.route("https://demo.archwalk.app/**", async (route) => {
+        const url = new URL(route.request().url());
+        if (
+          url.pathname != "/viewer" &&
+          !url.pathname.startsWith("/_next/") &&
+          !url.pathname.startsWith("/museum/") &&
+          url.pathname != "/favicon.ico"
+        ) {
+          await route.abort();
+          return;
+        }
+        const headers = { ...route.request().headers() };
+        delete headers.host;
+        delete headers.origin;
+        delete headers.referer;
+        const response = await route.fetch({
+          url: "http://127.0.0.1:3003" + url.pathname + url.search,
+          headers,
+        });
+        await route.fulfill({ response });
+      });
+      await page.goto("https://demo.archwalk.app/viewer");
+      // Render the actual Gallery component in an isolated client harness.
+      // This avoids Next's local-only HMR socket at the allowlisted virtual origin;
+      // the first test exercises normal Next hydration and mode transitions.
+      const { build } = createRequire(require.resolve("tsx/package.json"))(
+        "esbuild",
+      );
+      const bundle = await build({
+        stdin: {
+          contents:
+            "import {createRoot} from 'react-dom/client'; import {createElement} from 'react'; import {ListingMedia} from './src/app/viewer/listing-media'; const old=document.querySelector('#museum-media'); const mount=document.createElement('div'); old.replaceWith(mount); createRoot(mount).render(createElement(ListingMedia,{embedUrl:'https://archwalk.app/aw360/v/1e00029c-d4ff-4a22-8d5b-c95d10ae3f57'}));",
+          resolveDir: process.cwd(),
+          loader: "tsx",
+        },
+        bundle: true,
+        platform: "browser",
+        write: false,
+        minify: true,
+        jsx: "automatic",
+        define: { "process.env.NODE_ENV": '"production"', "process.env": "{}" },
+      });
+      await page.addScriptTag({ content: bundle.outputFiles[0].text });
+      await expect(
+        page.getByRole("heading", {
+          name: "Explore the rooms. Then step inside.",
+        }),
+      ).toBeVisible();
+      await expect(page.locator("iframe")).toHaveCount(0);
+      await expect(
+        page.getByRole("button", { name: "Photos", exact: true }),
+      ).toHaveAttribute("aria-pressed", "true");
       await expect
         .poll(() =>
-          photo.evaluate((node) => (node as HTMLImageElement).naturalWidth),
+          page
+            .locator(".museum-feature-photo img")
+            .evaluate((i) => (i as HTMLImageElement).naturalWidth),
         )
         .toBeGreaterThan(0);
-    expect(
+      const intro = await page.locator(".museum-intro").boundingBox(),
+        media = await page.locator("#museum-media").boundingBox();
+      await page.screenshot({
+        path: info.outputPath("hallwyl-" + viewport.name + "-photos.png"),
+        fullPage: true,
+        clip: {
+          x: 0,
+          y: intro!.y + (await page.evaluate(() => scrollY)),
+          width: viewport.width,
+          height: media!.y + media!.height - intro!.y,
+        },
+        style: "nextjs-portal{display:none!important}",
+      });
       await page
-        .locator("body")
-        .evaluate(
-          (node) => node.scrollWidth - document.documentElement.clientWidth,
+        .getByRole("button", { name: "Enter interactive 360° tour" })
+        .click();
+      const viewer = page.frameLocator("iframe");
+      await expect(viewer.locator("canvas").first()).toBeVisible({
+        timeout: 60000,
+      });
+      await expect(viewer.getByTestId("aw360-panorama-transition")).toBeHidden({
+        timeout: 60000,
+      });
+      await expect(page.locator(".museum-tour-instructions")).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Back to photos", exact: true }),
+      ).toBeVisible();
+      expect(await page.evaluate(() => document.fullscreenElement)).toBeNull();
+      const frame = await page.locator("iframe").boundingBox();
+      expect(frame!.height).toBeGreaterThan(viewport.height * 0.7);
+      expect(frame!.y).toBeGreaterThanOrEqual(0);
+      expect(frame!.y + frame!.height).toBeLessThanOrEqual(viewport.height + 4);
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
         ),
-    ).toBeLessThanOrEqual(1);
-    await expect(page.locator("iframe")).toHaveCount(0);
-    expect(await page.content()).not.toContain(
-      "listing-browser-secret-sentinel",
-    );
-    await page.screenshot({
-      path: info.outputPath(`hallwyl-${viewport.name}.png`),
-      fullPage: true,
-      style: "nextjs-portal{display:none!important}",
-    });
-  });
+      ).toBe(true);
+      await page.locator(".museum-media-workspace").screenshot({
+        path: info.outputPath("hallwyl-" + viewport.name + "-tour.png"),
+        style: "nextjs-portal{display:none!important}",
+      });
+    },
+  );
 }

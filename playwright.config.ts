@@ -38,6 +38,7 @@ export default defineConfig({
       timeout: 120000,
       env: {
         NEXT_DIST_DIR: ".next-e2e-photo",
+        HALLWYL_VIEWER_ORIGIN: "",
         APP_ORIGIN: "http://127.0.0.1:3003",
         DEMO_ACCESS_PASSWORD: "demo-test-password-only",
         DEMO_SESSION_SECRET: "test-only-signing-secret-32-characters-minimum",

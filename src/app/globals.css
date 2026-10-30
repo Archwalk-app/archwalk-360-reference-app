@@ -714,3 +714,114 @@ body {
     flex-wrap: wrap;
   }
 }
+
+/* Photo discovery and deliberately activated, in-page immersive Viewer. */
+.museum-media-workspace {
+  scroll-margin-top: 12px;
+}
+.museum-tour-invitation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 24px;
+  margin-top: 12px;
+  background: #e9ebdc;
+  border: 1px solid #d7dbc1;
+}
+.museum-tour-invitation > p {
+  font-family: var(--font-source-serif), Georgia, serif;
+  font-size: 21px;
+  line-height: 1.4;
+  color: #424b2c;
+}
+.museum-tour-invitation > .museum-primary {
+  margin: 0;
+  min-height: 48px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.museum-back-to-photos {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-size: 13px;
+  cursor: pointer;
+  background: var(--surface);
+}
+.museum-back-to-photos:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.museum-media[data-mode="tour"] .museum-media-workspace {
+  width: min(1760px, calc(100vw - 32px));
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.museum-media[data-mode="tour"] .museum-media-frame {
+  height: clamp(300px, calc(100svh - 152px), 960px);
+  border: 1px solid #d3d2c4;
+}
+.museum-tour-instructions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 12px;
+  margin-bottom: 12px;
+  min-height: 44px;
+  background: #e9ebdc;
+  border-radius: 3px;
+  color: #424b2c;
+}
+.museum-tour-instructions p {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.museum-tour-instructions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  cursor: pointer;
+  min-height: 44px;
+  padding-inline: 8px;
+  font-size: 12px;
+}
+.museum-tour-instructions button > span {
+  font-size: 20px;
+}
+@media (max-width: 640px) {
+  .museum-tour-invitation {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 18px;
+    gap: 14px;
+  }
+  .museum-tour-invitation > p {
+    font-size: 19px;
+  }
+  .museum-tour-invitation > .museum-primary {
+    justify-content: center;
+    font-size: 13px;
+  }
+  .museum-media[data-mode="tour"] .museum-media-frame {
+    height: clamp(300px, calc(100svh - 188px), 760px);
+  }
+  .museum-media-toggle {
+    gap: 18px;
+  }
+  .museum-back-to-photos {
+    padding-inline: 10px;
+    font-size: 12px;
+  }
+  .museum-tour-instructions {
+    gap: 8px;
+    padding-block: 4px;
+  }
+}

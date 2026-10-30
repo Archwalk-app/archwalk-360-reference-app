@@ -26,6 +26,16 @@ it("Hallwyl exhibition contains researched facts, four rooms and individually li
     assert.ok(html.includes(text), text);
   assert.doesNotMatch(html, /Sunset Villa|bedrooms|bathrooms|Reference Realty/);
   assert.equal(museumRooms.length, 4);
+  assert.match(html, /Explore the rooms. Then step inside./);
+  assert.match(html, /Enter interactive 360° tour/);
+  assert.doesNotMatch(html, /<iframe/);
+  const deep = renderToStaticMarkup(
+    createElement(ViewerListingPage, {
+      embedUrl: "https://archwalk.app/aw360/v/" + HALLWYL_PUBLIC_ID,
+      startInTour: true,
+    }),
+  );
+  assert.match(deep, /<iframe/);
   const credits = JSON.parse(
     readFileSync(
       new URL("../../../public/museum/credits.json", import.meta.url),

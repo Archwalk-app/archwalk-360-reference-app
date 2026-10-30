@@ -27,15 +27,15 @@ export function ViewerListingPage({
             <h1 id="museum-title">
               Hallwyl Museum<span className="museum-title-dot">.</span>
             </h1>
-            <p className="museum-deck">
-              A collector’s world. <em>Beautifully preserved.</em>
-            </p>
+            <h2 className="museum-deck">
+              Explore the rooms. Then step inside.
+            </h2>
           </div>
           <div className="museum-intro-note">
             <p>
-              Step inside the home of Wilhelmina and Walther von Hallwyl. Four
-              historic rooms reveal a life surrounded by art, craft and
-              extraordinary detail.
+              Browse photographs of Hallwyl Museum&apos;s historic interiors, or
+              enter the interactive 360° tour to look around, move between rooms
+              and discover the stories behind the artwork.
             </p>
             <Link href="/viewer?tour=1#museum-media" className="museum-primary">
               Explore in 360° <span aria-hidden>↗</span>
