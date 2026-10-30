@@ -5,9 +5,13 @@ test("gallery invitation, keyboard switch, cleanup and intentional deep link", a
 }) => {
   await page.setViewportSize({ width: 1440, height: 1080 });
   await page.goto("/viewer");
-  const photos = page.getByRole("button", { name: "Photos", exact: true }),
-    tour = page.getByRole("button", { name: "360° Tour", exact: true });
+  const photos = page.locator(".museum-photo-choice"),
+    tour = page.locator(".museum-tour-action");
   await expect(photos).toHaveAttribute("aria-pressed", "true");
+  await expect(tour).toHaveAttribute("aria-pressed", "false");
+  await expect(page.locator(".museum-tour-invitation")).toHaveCount(0);
+  await tour.hover();
+  await expect(tour).toHaveCSS("background-color", "rgb(82, 91, 43)");
   await expect(page.locator("iframe")).toHaveCount(0);
   await expect(page.locator("#listing-media img")).toHaveCount(5);
   await page
@@ -17,9 +21,8 @@ test("gallery invitation, keyboard switch, cleanup and intentional deep link", a
   await page.evaluate(() =>
     Object.assign(window, { discoveryVisit: "same-document" }),
   );
-  await page
-    .getByRole("button", { name: "Enter interactive 360° tour" })
-    .focus();
+  await page.getByRole("button", { name: "Step inside in 360°" }).focus();
+  await expect(tour).toHaveCSS("outline-width", "3px");
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL("http://127.0.0.1:3002/viewer");
   expect(await page.evaluate(() => Reflect.get(window, "discoveryVisit"))).toBe(
@@ -51,7 +54,7 @@ test("gallery invitation, keyboard switch, cleanup and intentional deep link", a
     /Morning Room/,
   );
   await expect(
-    page.getByRole("button", { name: "Enter interactive 360° tour" }),
+    page.getByRole("button", { name: "Step inside in 360°" }),
   ).toBeFocused();
   await tour.focus();
   await page.keyboard.press("Space");
@@ -134,22 +137,25 @@ for (const viewport of [
             .evaluate((i) => (i as HTMLImageElement).naturalWidth),
         )
         .toBeGreaterThan(0);
-      const intro = await page.locator(".museum-intro").boundingBox(),
-        media = await page.locator("#museum-media").boundingBox();
+      const action = page.getByRole("button", { name: "Step inside in 360°" });
+      await expect(action).toBeInViewport();
+      await expect(action).toHaveAttribute("aria-pressed", "false");
+      const toolbar = await page.locator(".museum-media-toolbar").boundingBox(),
+        photo = await page.locator(".museum-feature-photo").boundingBox();
+      expect(toolbar!.y).toBeGreaterThanOrEqual(0);
+      expect(photo!.y).toBeGreaterThan(toolbar!.y + toolbar!.height);
+      expect(photo!.y).toBeLessThan(viewport.height - 120);
+      expect(
+        await action.evaluate((e) => parseFloat(getComputedStyle(e).fontSize)),
+      ).toBeGreaterThanOrEqual(14);
+      await expect(page.locator(".museum-media-explanation")).toContainText(
+        "Don't just see the rooms. Look around, move between them and discover their stories.",
+      );
       await page.screenshot({
         path: info.outputPath("hallwyl-" + viewport.name + "-photos.png"),
-        fullPage: true,
-        clip: {
-          x: 0,
-          y: intro!.y + (await page.evaluate(() => scrollY)),
-          width: viewport.width,
-          height: media!.y + media!.height - intro!.y,
-        },
         style: "nextjs-portal{display:none!important}",
       });
-      await page
-        .getByRole("button", { name: "Enter interactive 360° tour" })
-        .click();
+      await page.getByRole("button", { name: "Step inside in 360°" }).click();
       const viewer = page.frameLocator("iframe");
       await expect(viewer.locator("canvas").first()).toBeVisible({
         timeout: 60000,

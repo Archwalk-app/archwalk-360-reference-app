@@ -27,7 +27,7 @@ it("Hallwyl exhibition contains researched facts, four rooms and individually li
   assert.doesNotMatch(html, /Sunset Villa|bedrooms|bathrooms|Reference Realty/);
   assert.equal(museumRooms.length, 4);
   assert.match(html, /Explore the rooms. Then step inside./);
-  assert.match(html, /Enter interactive 360° tour/);
+  assert.match(html, /Step inside in 360°/);
   assert.doesNotMatch(html, /<iframe/);
   const deep = renderToStaticMarkup(
     createElement(ViewerListingPage, {

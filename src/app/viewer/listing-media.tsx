@@ -17,7 +17,7 @@ export function ListingMedia({
   const [selected, setSelected] = useState(0);
   const [showInstructions, setShowInstructions] = useState(false);
   const workspace = useRef<HTMLDivElement>(null);
-  const invitation = useRef<HTMLButtonElement>(null);
+  const tourAction = useRef<HTMLButtonElement>(null);
   const back = useRef<HTMLButtonElement>(null);
   const interacted = useRef(false);
   const instructionsSeen = useRef(false);
@@ -47,7 +47,7 @@ export function ListingMedia({
         }
       }
       if (interacted.current) {
-        (mode === "tour" ? back : invitation).current?.focus({
+        (mode === "tour" ? back : tourAction).current?.focus({
           preventScroll: true,
         });
       }
@@ -76,38 +76,70 @@ export function ListingMedia({
             className="museum-media-toggle"
             role="group"
             aria-label="Choose museum media"
+            aria-describedby={
+              mode === "photos" ? "museum-media-explanation" : undefined
+            }
           >
             <button
+              ref={back}
+              className="museum-photo-choice"
               type="button"
               aria-pressed={mode === "photos"}
               aria-controls="listing-media"
               onClick={backToPhotos}
             >
-              Photos
+              <svg
+                aria-hidden="true"
+                focusable="false"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+              >
+                <rect x="3" y="4" width="18" height="16" rx="2" />
+                <circle cx="8" cy="9" r="1.5" />
+                <path d="m3 16 5-4 4 3 4-5 5 6" />
+              </svg>
+              <span>{mode === "photos" ? "Photos" : "Back to photos"}</span>
             </button>
             <button
               type="button"
+              ref={tourAction}
+              className="museum-tour-action"
               disabled={!embedUrl}
               aria-pressed={mode === "tour"}
               aria-controls="listing-media"
               onClick={enterTour}
             >
-              360° Tour <span aria-hidden>↗</span>
+              <svg
+                aria-hidden="true"
+                focusable="false"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <ellipse cx="12" cy="12" rx="4" ry="9" />
+                <path d="M3 12h18" />
+              </svg>
+              <span>
+                {mode === "photos" ? "Step inside in 360°" : "360° Tour"}
+              </span>
+              <span aria-hidden="true">→</span>
             </button>
           </div>
-          {mode === "photos" ? (
-            <p>An invitation to look closer</p>
-          ) : (
-            <button
-              ref={back}
-              className="museum-back-to-photos"
-              type="button"
-              onClick={backToPhotos}
-            >
-              <span aria-hidden>←</span> Back to photos
-            </button>
-          )}
         </div>
+        {mode === "photos" && (
+          <p id="museum-media-explanation" className="museum-media-explanation">
+            Don&apos;t just see the rooms. Look around, move between them and
+            discover their stories.
+          </p>
+        )}
         {mode === "tour" && showInstructions && (
           <div className="museum-tour-instructions" role="status">
             <p>
@@ -176,19 +208,6 @@ export function ListingMedia({
             </div>
           )}
         </div>
-        {mode === "photos" && embedUrl && (
-          <div className="museum-tour-invitation">
-            <p>There&apos;s more to explore beyond this photograph.</p>
-            <button
-              ref={invitation}
-              type="button"
-              className="museum-primary"
-              onClick={enterTour}
-            >
-              Enter interactive 360° tour <span aria-hidden>→</span>
-            </button>
-          </div>
-        )}
         {!embedUrl ? (
           <p role="status" className="museum-setup-note">
             The tour connection needs setup. No Experience has been created or
