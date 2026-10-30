@@ -47,7 +47,7 @@ export function ListingMedia({
         }
       }
       if (interacted.current) {
-        (mode === "tour" ? back : tourAction).current?.focus({
+        (mode === "tour" ? tourAction : back).current?.focus({
           preventScroll: true,
         });
       }
@@ -74,18 +74,34 @@ export function ListingMedia({
         <div className="museum-media-toolbar">
           <div
             className="museum-media-toggle"
-            role="group"
+            role="tablist"
             aria-label="Choose museum media"
-            aria-describedby={
-              mode === "photos" ? "museum-media-explanation" : undefined
-            }
+            onKeyDown={(event) => {
+              if (
+                !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)
+              )
+                return;
+              event.preventDefault();
+              const target =
+                event.key === "Home" || !embedUrl
+                  ? back
+                  : event.key === "End"
+                    ? tourAction
+                    : event.target === back.current
+                      ? tourAction
+                      : back;
+              target.current?.focus();
+            }}
           >
             <button
               ref={back}
               className="museum-photo-choice"
               type="button"
-              aria-pressed={mode === "photos"}
-              aria-controls="listing-media"
+              role="tab"
+              id="museum-photos-tab"
+              aria-selected={mode === "photos"}
+              tabIndex={mode === "photos" ? 0 : -1}
+              aria-controls="museum-photos-panel"
               onClick={backToPhotos}
             >
               <svg
@@ -102,15 +118,18 @@ export function ListingMedia({
                 <circle cx="8" cy="9" r="1.5" />
                 <path d="m3 16 5-4 4 3 4-5 5 6" />
               </svg>
-              <span>{mode === "photos" ? "Photos" : "Back to photos"}</span>
+              <span>Photos</span>
             </button>
             <button
               type="button"
               ref={tourAction}
               className="museum-tour-action"
               disabled={!embedUrl}
-              aria-pressed={mode === "tour"}
-              aria-controls="listing-media"
+              role="tab"
+              id="museum-tour-tab"
+              aria-selected={mode === "tour"}
+              tabIndex={mode === "tour" ? 0 : -1}
+              aria-controls="museum-tour-panel"
               onClick={enterTour}
             >
               <svg
@@ -127,19 +146,10 @@ export function ListingMedia({
                 <ellipse cx="12" cy="12" rx="4" ry="9" />
                 <path d="M3 12h18" />
               </svg>
-              <span>
-                {mode === "photos" ? "Step inside in 360°" : "360° Tour"}
-              </span>
-              <span aria-hidden="true">→</span>
+              <span>Interactive 360° Tour</span>
             </button>
           </div>
         </div>
-        {mode === "photos" && (
-          <p id="museum-media-explanation" className="museum-media-explanation">
-            Don&apos;t just see the rooms. Look around, move between them and
-            discover their stories.
-          </p>
-        )}
         {mode === "tour" && showInstructions && (
           <div className="museum-tour-instructions" role="status">
             <p>
@@ -156,9 +166,23 @@ export function ListingMedia({
           </div>
         )}
         <div id="listing-media" className="museum-media-frame">
-          {mode === "tour" && embedUrl ? (
-            <ViewerEmbed src={embedUrl} />
-          ) : (
+          <div
+            id="museum-tour-panel"
+            role="tabpanel"
+            aria-labelledby="museum-tour-tab"
+            hidden={mode !== "tour"}
+          >
+            {mode === "tour" && embedUrl ? (
+              <ViewerEmbed src={embedUrl} />
+            ) : null}
+          </div>
+          <div
+            id="museum-photos-panel"
+            role="tabpanel"
+            aria-labelledby="museum-photos-tab"
+            hidden={mode !== "photos"}
+            tabIndex={0}
+          >
             <div
               className="museum-gallery"
               aria-label="Hallwyl Museum photo gallery"
@@ -206,7 +230,7 @@ export function ListingMedia({
                 ))}
               </div>
             </div>
-          )}
+          </div>
         </div>
         {!embedUrl ? (
           <p role="status" className="museum-setup-note">

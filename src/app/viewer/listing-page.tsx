@@ -37,9 +37,6 @@ export function ViewerListingPage({
               enter the interactive 360° tour to look around, move between rooms
               and discover the stories behind the artwork.
             </p>
-            <Link href="/viewer?tour=1#museum-media" className="museum-primary">
-              Explore in 360° <span aria-hidden>↗</span>
-            </Link>
           </div>
         </section>
         <ListingMedia

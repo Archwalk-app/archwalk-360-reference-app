@@ -7,11 +7,11 @@ test("gallery invitation, keyboard switch, cleanup and intentional deep link", a
   await page.goto("/viewer");
   const photos = page.locator(".museum-photo-choice"),
     tour = page.locator(".museum-tour-action");
-  await expect(photos).toHaveAttribute("aria-pressed", "true");
-  await expect(tour).toHaveAttribute("aria-pressed", "false");
+  await expect(photos).toHaveAttribute("aria-selected", "true");
+  await expect(tour).toHaveAttribute("aria-selected", "false");
   await expect(page.locator(".museum-tour-invitation")).toHaveCount(0);
   await tour.hover();
-  await expect(tour).toHaveCSS("background-color", "rgb(82, 91, 43)");
+  await expect(tour).toHaveCSS("background-color", "rgba(65, 75, 41, 0.035)");
   await expect(page.locator("iframe")).toHaveCount(0);
   await expect(page.locator("#listing-media img")).toHaveCount(5);
   await page
@@ -21,8 +21,11 @@ test("gallery invitation, keyboard switch, cleanup and intentional deep link", a
   await page.evaluate(() =>
     Object.assign(window, { discoveryVisit: "same-document" }),
   );
-  await page.getByRole("button", { name: "Step inside in 360°" }).focus();
-  await expect(tour).toHaveCSS("outline-width", "3px");
+  await photos.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(tour).toBeFocused();
+  await expect(photos).toHaveAttribute("aria-selected", "true");
+  await expect(tour).toHaveCSS("outline-width", "2px");
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL("http://127.0.0.1:3002/viewer");
   expect(await page.evaluate(() => Reflect.get(window, "discoveryVisit"))).toBe(
@@ -37,32 +40,31 @@ test("gallery invitation, keyboard switch, cleanup and intentional deep link", a
   expect((await frame.boundingBox())!.height).toBeGreaterThan(
     before.height + 120,
   );
-  await expect(
-    page.getByRole("button", { name: "Back to photos", exact: true }),
-  ).toBeFocused();
+  await expect(tour).toBeFocused();
+  await expect(tour).toHaveAttribute("aria-selected", "true");
   await expect(page.locator(".museum-tour-instructions")).toBeVisible();
   const handle = await frame.elementHandle();
   await page.getByRole("button", { name: "Dismiss tour instructions" }).click();
   expect(await handle!.evaluate((node) => node.isConnected)).toBe(true);
-  await page
-    .getByRole("button", { name: "Back to photos", exact: true })
-    .click();
+  await page.getByRole("tab", { name: "Photos", exact: true }).click();
   await expect(frame).toHaveCount(0);
   expect(await handle!.evaluate((node) => node.isConnected)).toBe(false);
   await expect(page.locator(".museum-feature-photo img")).toHaveAttribute(
     "alt",
     /Morning Room/,
   );
-  await expect(
-    page.getByRole("button", { name: "Step inside in 360°" }),
-  ).toBeFocused();
+  await expect(photos).toBeFocused();
+  await page.keyboard.press("End");
+  await expect(tour).toBeFocused();
+  await page.keyboard.press("Home");
+  await expect(photos).toBeFocused();
   await tour.focus();
   await page.keyboard.press("Space");
   await expect(frame).toHaveCount(1);
   await expect(page.locator(".museum-tour-instructions")).toHaveCount(0);
   expect(await page.evaluate(() => document.fullscreenElement)).toBeNull();
   await photos.click();
-  await page.getByRole("link", { name: "Explore in 360°" }).click();
+  await page.goto("/viewer?tour=1#museum-media");
   await expect(page).toHaveURL(/tour=1#museum-media/);
   await expect(frame).toHaveCount(1);
   await expect(page.locator(".museum-tour-instructions")).toHaveCount(0);
@@ -128,8 +130,8 @@ for (const viewport of [
       ).toBeVisible();
       await expect(page.locator("iframe")).toHaveCount(0);
       await expect(
-        page.getByRole("button", { name: "Photos", exact: true }),
-      ).toHaveAttribute("aria-pressed", "true");
+        page.getByRole("tab", { name: "Photos", exact: true }),
+      ).toHaveAttribute("aria-selected", "true");
       await expect
         .poll(() =>
           page
@@ -137,9 +139,9 @@ for (const viewport of [
             .evaluate((i) => (i as HTMLImageElement).naturalWidth),
         )
         .toBeGreaterThan(0);
-      const action = page.getByRole("button", { name: "Step inside in 360°" });
+      const action = page.getByRole("tab", { name: "Interactive 360° Tour" });
       await expect(action).toBeInViewport();
-      await expect(action).toHaveAttribute("aria-pressed", "false");
+      await expect(action).toHaveAttribute("aria-selected", "false");
       const toolbar = await page.locator(".museum-media-toolbar").boundingBox(),
         photo = await page.locator(".museum-feature-photo").boundingBox();
       expect(toolbar!.y).toBeGreaterThanOrEqual(0);
@@ -147,15 +149,19 @@ for (const viewport of [
       expect(photo!.y).toBeLessThan(viewport.height - 120);
       expect(
         await action.evaluate((e) => parseFloat(getComputedStyle(e).fontSize)),
-      ).toBeGreaterThanOrEqual(14);
-      await expect(page.locator(".museum-media-explanation")).toContainText(
-        "Don't just see the rooms. Look around, move between them and discover their stories.",
-      );
+      ).toBeGreaterThanOrEqual(15);
+      await expect(page.locator(".museum-media-explanation")).toHaveCount(0);
+      await expect(
+        page.getByRole("link", { name: "Explore in 360°" }),
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("tab", { name: "Photos", exact: true }),
+      ).toHaveCSS("border-bottom-color", "rgb(102, 110, 56)");
       await page.screenshot({
         path: info.outputPath("hallwyl-" + viewport.name + "-photos.png"),
         style: "nextjs-portal{display:none!important}",
       });
-      await page.getByRole("button", { name: "Step inside in 360°" }).click();
+      await page.getByRole("tab", { name: "Interactive 360° Tour" }).click();
       const viewer = page.frameLocator("iframe");
       await expect(viewer.locator("canvas").first()).toBeVisible({
         timeout: 60000,
@@ -165,7 +171,7 @@ for (const viewport of [
       });
       await expect(page.locator(".museum-tour-instructions")).toBeVisible();
       await expect(
-        page.getByRole("button", { name: "Back to photos", exact: true }),
+        page.getByRole("tab", { name: "Photos", exact: true }),
       ).toBeVisible();
       expect(await page.evaluate(() => document.fullscreenElement)).toBeNull();
       const frame = await page.locator("iframe").boundingBox();
