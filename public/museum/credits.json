@@ -1,0 +1,46 @@
+[
+  {
+    "file": "great-drawing-room.webp",
+    "photographer": "Jan Ainali",
+    "source": "https://commons.wikimedia.org/wiki/File:Interior_of_Hallwylska_360_degree_11.JPG",
+    "original": "https://upload.wikimedia.org/wikipedia/commons/3/30/Interior_of_Hallwylska_360_degree_11.JPG",
+    "originalSha1": "82b1b2c0f2c9f80845886be597f7c5a88c18069a",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "modifications": "Rectilinear perspective extracted from the original 360° photograph (image-space yaw 180°, pitch 23°, horizontal FOV 88°); resized to 1600×1100; encoded as WebP; metadata removed. No generative imagery.",
+    "verification": "Individual Commons licence wikitext and original SHA-1 checked against the prepared asset package, audited 27 October 2026."
+  },
+  {
+    "file": "morning-room.webp",
+    "photographer": "Jan Ainali",
+    "source": "https://commons.wikimedia.org/wiki/File:Interior_of_Hallwylska_360_degree_23.JPG",
+    "original": "https://upload.wikimedia.org/wikipedia/commons/c/ca/Interior_of_Hallwylska_360_degree_23.JPG",
+    "originalSha1": "993bd0a9bc28fbb116c3ab89bb41c57bd3383bd0",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "modifications": "Rectilinear perspective extracted from the original 360° photograph (image-space yaw 0°, pitch 12°, horizontal FOV 88°); resized to 1600×1100; encoded as WebP; metadata removed. No generative imagery.",
+    "verification": "Individual Commons licence wikitext and original SHA-1 checked against the prepared asset package, audited 27 October 2026."
+  },
+  {
+    "file": "smoking-room.webp",
+    "photographer": "Jan Ainali",
+    "source": "https://commons.wikimedia.org/wiki/File:Interior_of_Hallwylska_360_degree_26.JPG",
+    "original": "https://upload.wikimedia.org/wikipedia/commons/b/b4/Interior_of_Hallwylska_360_degree_26.JPG",
+    "originalSha1": "3155dbb49e26b31cc42e90259c22722790863520",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "modifications": "Rectilinear perspective extracted from the original 360° photograph (image-space yaw 0°, pitch 18°, horizontal FOV 88°); resized to 1600×1100; encoded as WebP; metadata removed. No generative imagery.",
+    "verification": "Individual Commons licence wikitext and original SHA-1 checked against the prepared asset package, audited 27 October 2026."
+  },
+  {
+    "file": "ladies-drawing-room.webp",
+    "photographer": "Jan Ainali",
+    "source": "https://commons.wikimedia.org/wiki/File:Interior_of_Hallwylska_360_degree_13.JPG",
+    "original": "https://upload.wikimedia.org/wikipedia/commons/9/9b/Interior_of_Hallwylska_360_degree_13.JPG",
+    "originalSha1": "cafec5f329999125dc0cc43a3d698dc53f46a53d",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "modifications": "Rectilinear perspective extracted from the original 360° photograph (image-space yaw 0°, pitch 18°, horizontal FOV 88°); resized to 1600×1100; encoded as WebP; metadata removed. No generative imagery.",
+    "verification": "Individual Commons licence wikitext and original SHA-1 checked against the prepared asset package, audited 27 October 2026."
+  }
+]

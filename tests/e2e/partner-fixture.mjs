@@ -30,9 +30,9 @@ function readBody(request) {
 
 function listingExperience() {
   return {
-    experience_id: "fixture-exp",
-    public_id: "fixture-public",
-    name: "Sunset Villa",
+    experience_id: "166ac0f6-28c0-4858-92fc-f06243b0becc",
+    public_id: "1e00029c-d4ff-4a22-8d5b-c95d10ae3f57",
+    name: "Hallwyl Museum",
     external_resource_id: "sunset-villa-001",
     lifecycle_status: "active",
     publication_status: listingState,

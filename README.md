@@ -1,96 +1,33 @@
-# ArchWalk 360 reference application
+# Hallwyl Museum showcase
 
-This is a small fictional property platform (Reference Realty) with ArchWalk 360
-embedded as a capability, not as ArchWalk Manager.
+`/viewer` is the independent **Rooms in Time** exhibition. `/editor` edits only the existing Hallwyl Experience; it does not create-or-resolve or overwrite Experiences. `/plugin` remains the separate Blue Lagoon demonstration with its existing identities and behavior.
 
-- `/editor` — seller workspace with the embedded Creator (`Sunset Villa`)
-- `/viewer` — customer marketplace listing with Photos ↔ 360° Tour
-- `/plugin` — Blue Lagoon resort dashboard: 200 imported rooms → 8 visual variants → 8 ArchWalk Experiences, with Embedded Creator on the same page
-- `/plugin/rooms/101` — guest room page for a physical room (101 and 102 share Deluxe King)
-- `/` redirects to `/editor`
+Hallwyl’s production mapping was verified read-only: Item ID `sunset-villa-001`, Experience `166ac0f6-28c0-4858-92fc-f06243b0becc`, public ID `1e00029c-d4ff-4a22-8d5b-c95d10ae3f57`, no customer scope. Configure `HALLWYL_ITEM_ID` server-side if the connected ID changes; set `HALLWYL_CUSTOMER_ID` only for a customer-scoped connection. Incorrect mappings produce a non-destructive setup state. The public exhibition embeds the verified published public ID without requiring a Partner secret.
 
-Sunset Villa uses external key `sunset-villa-001`. Blue Lagoon variants use
-`external_customer_id=blue_lagoon` and `external_resource_id=room_type_<variant>`.
-There is no database, partner authentication, or CMS.
+## Server configuration
 
-## Running locally
+- `HALLWYL_API_BASE=https://api.archwalk.app`
+- `HALLWYL_APP_ORIGIN=https://archwalk.app`
+- `HALLWYL_API_KEY`: the existing Hallwyl Integration’s server-side production credential, never `NEXT_PUBLIC_*`
+- `APP_ORIGIN=https://archwalk-360-reference-app.vercel.app` in Vercel; the exact local origin for local Creator testing must also be registered by the owner
+- `HALLWYL_ITEM_ID=sunset-villa-001`; leave `HALLWYL_CUSTOMER_ID` unset for the verified mapping
 
-```bash
-pnpm install
-cp .env.example .env.local
-pnpm dev --port 3001
-```
+The credential needs `experiences:read`, `creator_sessions:issue` and the existing Creator action subset: `experiences:write`, `experiences:publish`, `panoramas:read`, `panoramas:write`, `panoramas:upload`. No credentials belong in Git. Vercel settings/deployment are owner-managed. `HALLWYL_VIEWER_ORIGIN` is an optional test-only Viewer origin override; production defaults to `https://archwalk.app`.
 
-Open [http://localhost:3001](http://localhost:3001).
+## Local development
 
-## Environment
+`pnpm install`, configure an untracked `.env`, then `pnpm dev --port 3001`. The home route opens `/viewer`. Do not open `/plugin` against production just to test Hallwyl: the separate plugin intentionally create-or-resolves its Blue Lagoon inventory.
 
-Server-side only (never prefix these with `NEXT_PUBLIC_`):
+## Photographs
 
-| Variable | Purpose |
-|---|---|
-| `ARCHWALK_API_BASE` | Partner API host, no trailing slash |
-| `ARCHWALK_APP_ORIGIN` | ArchWalk app origin for Creator/Viewer iframes |
-| `AW360_API_KEY` | Partner API key (`aw360_sk_…`) |
-| `APP_ORIGIN` | This app’s origin (`http://localhost:3001` locally), used when minting Creator sessions |
+Four optimized WebP perspectives were derived from the prepared Hallwyl panorama package, matching the actual tour. Source photographs: **Jan Ainali, CC BY-SA 4.0**. Derivatives retain that licence. Individual source URLs, source checksums, licence links and modifications: `public/museum/credits.json` and `/viewer/credits`. Reproduce with `node scripts/prepare-museum-photos.mjs /path/to/ArchWalk-Demo-Assets`. No full panoramas or massive originals are committed.
 
-Local topology:
+History and room facts use the museum’s linked official room guide and house history. No official sponsorship, ticketing, opening hours or booking function is implied.
 
-- ArchWalk backend: `8000`
-- ArchWalk Creator / Viewer: `3000`
-- This Reference App: `3001` → [http://localhost:3001/plugin](http://localhost:3001/plugin)
+## Blue Lagoon configuration stays separate
 
-`AW360_API_KEY` stays on the Next.js server. Browser JS only receives Experience/publication data and short-lived Creator session tokens for the iframe handshake.
+Keep the existing `ARCHWALK_API_BASE`, `ARCHWALK_APP_ORIGIN` and `AW360_API_KEY` values for Blue Lagoon. Hallwyl-specific overrides take precedence only for the museum editor; legacy global values remain a fallback for existing single-integration setups. Do not replace a Blue Lagoon key with a Hallwyl key when configuring Vercel. Blue Lagoon keeps `external_customer_id=blue_lagoon` and `external_resource_id=room_type_<variant>`.
 
-Opening `/plugin` automatically create-or-resolves one Experience per visual variant. There is no “create 8 Experiences” button.
+## Existing embedding behavior
 
-## ArchWalk setup
-
-1. Enable ArchWalk 360 for the Organization and create an Integration.
-2. Set media policy to `managed_only` or `both` (this app uses Creator-managed uploads).
-3. Add this app’s exact origin (`APP_ORIGIN`) to Integration allowed origins.
-4. Issue a Partner API credential with at least: `experiences:read`, `experiences:write`, `experiences:publish`, `panoramas:read`, `panoramas:write`, `panoramas:upload`, `creator_sessions:issue`.
-5. Store the raw key immediately; it is shown once.
-
-To reuse Sunset Villa content already created in ArchWalk, open that Standalone Experience in the Organization's `/archwalk-360` library and choose **Connect to integration**. Select this Integration and enter the exact external resource ID `sunset-villa-001` (the listing key in `src/lib/property.ts`). This binds the same Experience; its Panoramas, draft, publication, and `public_id` remain in place. Opening `/editor` then resolves it through the normal Partner create-or-resolve call and the embedded Creator loads its existing Panoramas. The `/viewer` listing keeps the same published public Viewer. If no Experience was connected under that key, the reference app can still create one through the Partner API.
-
-Blue Lagoon room types use the same Connect flow with `external_resource_id` values such as `room_type_deluxe_king` and customer `blue_lagoon`. Rooms 101 and 102 both resolve that Deluxe King identity.
-
-## Tests
-
-```bash
-pnpm test
-```
-
-## Embedding layout
-
-The partner controls iframe width, height, surrounding layout, and where the
-Viewer appears. ArchWalk supplies the embedded Creator runtime. This reference
-editor demonstrates a spacious integration, rather than requiring partners to
-use the same host layout: readable intro copy, a workspace up to 1536px wide with
-20–32px gutters, and an iframe sized to `100dvh - 6rem` (minimum 860px for
-the stacked mobile editor, or 720px on larger screens). The ready iframe has no surrounding card or status footer.
-
-Keep `allow="fullscreen"` and `allowFullScreen` on the Creator iframe so its
-immersive editor can use native fullscreen. Unsupported browsers retain the
-expanded preview inside the partner-sized iframe. No cross-origin DOM height
-inspection is used.
-
-## Customer listing media
-
-`/viewer` starts with local photos. A published tour adds a **360° Tour** option
-that replaces the gallery in the same media area; the customer stays in the host
-product. The Viewer’s own fullscreen control expands its iframe and returns to
-the listing on exit. Returning to Photos unmounts the Viewer to free rendering
-resources. Unpublished, unconfigured or unavailable tours leave a photo-only listing.
-
-Demo photos in `public/property/` are rectilinear stills of the same ArchWalk-owned
-`ArchWalk/public/pano1.jpg` demo panorama (the higher-resolution source of the
-marketing `landing/hero-panorama.webp`), not separate
-properties or private/customer photographs. Rebuild them with
-`node scripts/prepare-property-photos.mjs /path/to/pano1.jpg`.
-
-Install Chromium once with `pnpm exec playwright install chromium`.
-Browser checks: `pnpm test:e2e`. Real local smoke: `pnpm test:integration` with this
-app on `localhost:3001`, ArchWalk on `localhost:3000`, and Sunset Villa published
-under the existing registered integration/origin. These checks perform no writes.
+Both iframes retain `allow="fullscreen"` and `allowFullScreen`. The Creator handshake passes only its short-lived session token to the trusted iframe origin, never in its URL. The partner host controls the iframe footprint; this change does not remount or modify the ArchWalk runtime. Photos unmount the Viewer iframe to release rendering resources.

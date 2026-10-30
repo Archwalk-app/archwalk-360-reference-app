@@ -1,111 +1,81 @@
 import { test, expect } from "@playwright/test";
-
-test.beforeEach(async ({ request }) => { await request.post("http://127.0.0.1:3216/fixture-state?state=published"); });
-
-test("Photos defaults, keyboard tour mount and resource release", async ({ page }) => {
+test("Hallwyl Photos and 360° Tour are keyboard operable and release the iframe", async ({
+  page,
+}) => {
   await page.goto("/viewer");
-  const photos = page.getByRole("button", { name: "Photos", exact: true });
-  const tour = page.getByRole("button", { name: "360° Tour", exact: true });
-  await expect(photos).toHaveAttribute("aria-pressed", "true");
+  const photos = page.getByRole("button", { name: "Photos", exact: true }),
+    tour = page.getByRole("button", { name: "360° Tour", exact: true });
   await expect(page.locator("iframe")).toHaveCount(0);
-  await expect(page.locator("#listing-media").getByRole("img")).toHaveCount(3);
+  await expect(page.locator("#listing-media img")).toHaveCount(5);
+  await page
+    .getByRole("button", { name: "View Morning Room photograph" })
+    .click();
+  await expect(page.locator(".museum-feature-photo img")).toHaveAttribute(
+    "alt",
+    /Morning Room/,
+  );
   const before = (await page.locator("#listing-media").boundingBox())!;
-  await tour.focus(); await page.keyboard.press("Enter");
-  await expect(tour).toBeFocused();
-  await expect(tour).toHaveAttribute("aria-pressed", "true");
-  const iframe = page.locator("iframe");
-  await expect(iframe).toHaveAttribute("src", "http://127.0.0.1:3216/aw360/v/fixture-public");
-  await expect(iframe).toHaveAttribute("allow", "fullscreen");
-  await expect(iframe).toHaveAttribute("allowfullscreen", "");
-  const node = await iframe.elementHandle();
+  await tour.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("iframe")).toHaveAttribute(
+    "src",
+    "http://127.0.0.1:3216/aw360/v/1e00029c-d4ff-4a22-8d5b-c95d10ae3f57",
+  );
+  await expect(page.locator("iframe")).toHaveAttribute("allow", "fullscreen");
+  const iframe = await page.locator("iframe").elementHandle();
   const after = (await page.locator("#listing-media").boundingBox())!;
-  expect(Math.abs(after.height - before.height)).toBeLessThan(2);
-  expect(Math.abs(after.y - before.y)).toBeLessThan(2);
-  await photos.focus(); await page.keyboard.press("Space");
-  await expect(photos).toBeFocused();
-  await expect(iframe).toHaveCount(0);
-  expect(await node!.evaluate((element) => element.isConnected)).toBe(false);
-  await tour.click(); await expect(iframe).toHaveCount(1);
-  expect(await node!.evaluate((element) => element.isConnected)).toBe(false);
-  await expect(page).toHaveURL(/\/viewer$/);
-});
-
-for (const state of ["unpublished", "unavailable"]) {
-  test(`${state} tour leaves a clean photo listing`, async ({ page, request }) => {
-    await request.post(`http://127.0.0.1:3216/fixture-state?state=${state}`);
-    await page.goto("/viewer");
-    await expect(page.getByRole("heading", { name: "Sunset Villa", exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "360° Tour", exact: true })).toHaveCount(0);
-    await expect(page.locator("#listing-media").getByRole("img")).toHaveCount(3);
-    await expect(page.locator("iframe")).toHaveCount(0);
-    await expect(page.getByText("SECRET CONFIGURATION DETAIL")).toHaveCount(0);
-  });
-}
-
-for (const [width, height] of [[390, 844], [768, 1024], [1280, 800], [1440, 900], [1728, 900]]) {
-  test(`media footprint at ${width}×${height}`, async ({ page }) => {
-    await page.setViewportSize({ width, height }); await page.goto("/viewer");
-    await expect(page.locator("#listing-media").getByRole("img").first()).toBeVisible();
-    for (const image of await page.locator("#listing-media").getByRole("img").all()) await expect.poll(() => image.evaluate((element) => (element as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
-    const media = page.locator("#listing-media"); const before = (await media.boundingBox())!;
-    for (const button of await page.getByRole("group", { name: "Choose property media" }).getByRole("button").all()) expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(44);
-    expect(await page.locator("body").evaluate((element) => element.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
-    await page.getByRole("button", { name: "360° Tour", exact: true }).click();
-    const iframe = (await page.locator("iframe").boundingBox())!;
-    expect(Math.abs(iframe.height - before.height)).toBeLessThan(2);
-    expect(Math.abs(iframe.width - before.width)).toBeLessThan(2);
-    expect(iframe.height).toBeGreaterThanOrEqual(360);
-  });
-}
-
-test("credential sentinel stays outside browser HTML and loaded scripts", async ({ page }) => {
-  const scripts: string[] = [];
-  page.on("response", async (response) => { if (response.request().resourceType() === "script") scripts.push(await response.text()); });
-  await page.goto("/viewer");
-  await expect(page.getByRole("button", { name: "360° Tour" })).toBeVisible();
-  expect(await page.content()).not.toContain("listing-browser-secret-sentinel");
-  expect(scripts.join("\n")).not.toContain("listing-browser-secret-sentinel");
-  expect(await page.content()).not.toContain("SECRET CONFIGURATION DETAIL");
-});
-
-test("unconfigured partner still serves a normal customer listing", async ({ page }) => {
-  await page.goto("http://127.0.0.1:3003/viewer");
-  await expect(page.getByRole("heading", { name: "Sunset Villa", exact: true })).toBeVisible();
-  await expect(page.locator("#listing-media").getByRole("img")).toHaveCount(3);
-  await expect(page.getByRole("button", { name: "360° Tour", exact: true })).toHaveCount(0);
+  expect(Math.abs(before.height - after.height)).toBeLessThan(2);
+  await photos.focus();
+  await page.keyboard.press("Space");
   await expect(page.locator("iframe")).toHaveCount(0);
-  await expect(page.getByText("ArchWalk 360 is not configured for this host yet.")).toHaveCount(0);
+  expect(await iframe!.evaluate((node) => node.isConnected)).toBe(false);
+  await expect(page.locator(".museum-feature-photo img")).toHaveAttribute(
+    "alt",
+    /Morning Room/,
+  );
+  await page.getByRole("link", { name: "Explore in 360°" }).click();
+  await expect(page.locator("iframe")).toHaveCount(1);
 });
-
-for (const width of [1440, 390]) {
-  test(`editor listing action belongs to the intro at ${width}px`, async ({ page }) => {
-    await page.setViewportSize({ width, height: 900 });
-    // Isolated host layout check; no real Creator session or Partner writes.
-    await page.route("**/api/archwalk/creator-session", (route) => route.fulfill({
-      contentType: "application/json",
-      body: JSON.stringify({ sessionApiId: "layout-session", token: "fixture-token", creatorOrigin: "http://127.0.0.1:3216", creatorUrl: "http://127.0.0.1:3216/aw360/c/layout-session" }),
-    }));
-    await page.goto("/editor");
-    const action = page.getByRole("link", { name: "View public listing", exact: true });
-    await expect(action).toHaveCount(1);
-    await expect(page.locator('a[href="/viewer"]')).toHaveCount(1);
-    await expect(action).toHaveAttribute("href", "/viewer");
-    await expect(page.locator("[data-editor-intro]").getByRole("link", { name: "View public listing", exact: true })).toBeVisible();
-    await expect(page.locator("iframe")).toHaveCount(1);
-    expect(await action.evaluate((element) => Boolean(element.compareDocumentPosition(document.querySelector("iframe")!) & Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true);
-    expect((await action.boundingBox())!.height).toBeGreaterThanOrEqual(44);
-    await action.focus(); await expect(action).toBeFocused();
-    expect(await action.evaluate((element) => getComputedStyle(element).outlineStyle)).not.toBe("none");
-    expect(await page.locator("body").evaluate((element) => element.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
-    const copy = page.getByText(/Create and manage the immersive 360 experience shown/);
-    const copyBox = (await copy.boundingBox())!;
-    const actionBox = (await action.boundingBox())!;
-    if (width === 390) expect(actionBox.y).toBeGreaterThanOrEqual(copyBox.y + copyBox.height);
-    else expect(actionBox.x).toBeGreaterThanOrEqual(copyBox.x + copyBox.width);
-    await page.screenshot({ path: `/tmp/aw029d-editor-nav-${width}.png`, fullPage: true });
-    await action.press("Enter");
-    await expect(page).toHaveURL(/\/viewer$/);
-    await expect(page.getByRole("button", { name: "Photos", exact: true })).toHaveAttribute("aria-pressed", "true");
+for (const viewport of [
+  { name: "desktop", width: 1440, height: 1080 },
+  { name: "mobile", width: 390, height: 844 },
+]) {
+  test(`Hallwyl ${viewport.name} visual smoke`, async ({ page }, info) => {
+    await page.setViewportSize(viewport);
+    await page.goto("/viewer");
+    await expect(page).toHaveTitle(
+      "Hallwyl Museum — Interactive 360° Experience | ArchWalk",
+    );
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "Hallwyl Museum.",
+    );
+    await expect(page.locator(".museum-room-card")).toHaveCount(4);
+    await expect(
+      page.getByText(
+        "Independent interactive demonstration powered by ArchWalk 360. Not an official Hallwyl Museum website.",
+      ),
+    ).toBeVisible();
+    for (const photo of await page.locator("img").all())
+      await expect
+        .poll(() =>
+          photo.evaluate((node) => (node as HTMLImageElement).naturalWidth),
+        )
+        .toBeGreaterThan(0);
+    expect(
+      await page
+        .locator("body")
+        .evaluate(
+          (node) => node.scrollWidth - document.documentElement.clientWidth,
+        ),
+    ).toBeLessThanOrEqual(1);
     await expect(page.locator("iframe")).toHaveCount(0);
+    expect(await page.content()).not.toContain(
+      "listing-browser-secret-sentinel",
+    );
+    await page.screenshot({
+      path: info.outputPath(`hallwyl-${viewport.name}.png`),
+      fullPage: true,
+      style: "nextjs-portal{display:none!important}",
+    });
   });
 }

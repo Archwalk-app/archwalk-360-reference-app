@@ -1,7 +1,10 @@
-import { createPartnerClient } from "@/lib/archwalk/client";
 import { parentOriginFromRequest } from "@/lib/archwalk/env";
 import { PartnerApiError, publicErrorMessage } from "@/lib/archwalk/errors";
 import { creatorIframeSrc } from "@/lib/archwalk/protocol";
+import {
+  createMuseumClient,
+  resolveMuseumExperience,
+} from "@/lib/archwalk/museum.server";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +21,7 @@ function sessionJson(
 }
 
 export async function POST(request: Request) {
-  const client = createPartnerClient();
+  const client = createMuseumClient();
   if (!client.config.configured) {
     return sessionJson(
       {
@@ -31,7 +34,7 @@ export async function POST(request: Request) {
 
   try {
     const origin = parentOriginFromRequest(request);
-    const experience = await client.createOrResolveExperience();
+    const experience = await resolveMuseumExperience(client);
     const session = await client.mintCreatorSession(
       origin,
       experience.experience_id,
@@ -51,7 +54,10 @@ export async function POST(request: Request) {
         error.status === 401 || error.status === 403 ? 503 : error.status;
       return sessionJson(
         {
-          error: publicErrorMessage(error),
+          error:
+            error.code === "hallwyl_connection_mismatch"
+              ? error.message
+              : publicErrorMessage(error),
           code: error.code,
           retryAfterSeconds: error.retryAfterSeconds,
         },

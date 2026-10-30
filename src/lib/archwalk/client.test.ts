@@ -42,7 +42,7 @@ describe("Partner API client", () => {
     assert.equal(experience.experience_id, "exp_1");
     assert.equal(calls[0]?.url, "https://api.archwalk.example/api/v1/360/experiences");
     assert.deepEqual(calls[0]?.body, {
-      name: "Sunset Villa",
+      name: "Hallwyl Museum",
       external_resource_id: "sunset-villa-001",
     });
   });
@@ -51,7 +51,7 @@ describe("Partner API client", () => {
     const experienceId = randomUUID();
     const publicId = randomUUID();
     const calls: Array<{ method: string; url: string; body: unknown }> = [];
-    const existing = { experience_id: experienceId, public_id: publicId, name: "Sunset Villa",
+    const existing = { experience_id: experienceId, public_id: publicId, name: "Hallwyl Museum",
       external_resource_id: property.externalListingKey, lifecycle_status: "active",
       publication_status: "published" as const, draft_revision: 8 };
     const client = createPartnerClient({ env, fetch: async (input, init) => {

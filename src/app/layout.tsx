@@ -13,9 +13,10 @@ const sourceSerif = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
-  title: "Reference Realty",
+  metadataBase: new URL("https://archwalk-360-reference-app.vercel.app"),
+  title: "Independent 360° showcases | ArchWalk",
   description:
-    "A fictional property platform host shell used as the ArchWalk 360 reference application.",
+    "Independent cultural and hospitality showcases demonstrating ArchWalk 360 on a third-party website.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

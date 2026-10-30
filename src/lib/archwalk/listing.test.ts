@@ -1,52 +1,54 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
-import { property } from "../property";
+import { it } from "node:test";
+import { readFileSync } from "node:fs";
+import { renderToStaticMarkup } from "react-dom/server";
+import { createElement } from "react";
 import { getViewerListing } from "./listing";
-
-describe("viewer listing", () => {
-  it("builds the documented Viewer embed URL after publish", async () => {
-    const originalFetch = globalThis.fetch;
-    const originalEnv = { ...process.env };
-    Object.assign(process.env, {
-      ARCHWALK_API_BASE: "https://api.archwalk.example",
-      ARCHWALK_APP_ORIGIN: "https://app.archwalk.example",
-      AW360_API_KEY: "aw360_sk_cred.testsecret",
-    });
-
-    globalThis.fetch = (async (input) => {
-      const url = String(input);
-      assert.match(url, /external_resource_id=sunset-villa-001/);
-      return Response.json({
-        items: [
-          {
-            experience_id: "exp_1",
-            public_id: "pub_live",
-            name: property.name,
-            external_resource_id: property.externalListingKey,
-            lifecycle_status: "active",
-            publication_status: "published",
-            draft_revision: 8,
-          },
-        ],
-        next_cursor: null,
-      });
-    }) as typeof fetch;
-
-    try {
-      const listing = await getViewerListing();
-      assert.deepEqual(listing, {
-        status: "published",
-        publicId: "pub_live",
-        embedUrl: "https://app.archwalk.example/aw360/v/pub_live",
-      });
-    } finally {
-      globalThis.fetch = originalFetch;
-      for (const key of Object.keys(process.env)) {
-        if (!(key in originalEnv)) {
-          delete process.env[key];
-        }
-      }
-      Object.assign(process.env, originalEnv);
-    }
-  });
+import { ViewerListingPage } from "../../app/viewer/listing-page";
+import { museumRooms } from "../property";
+import { HALLWYL_PUBLIC_ID } from "./museum.server";
+it("Hallwyl exhibition contains researched facts, four rooms and individually licensed local images", async () => {
+  const html = renderToStaticMarkup(
+    createElement(ViewerListingPage, {
+      embedUrl: "https://archwalk.app/aw360/v/" + HALLWYL_PUBLIC_ID,
+    }),
+  );
+  for (const text of [
+    "Hallwyl Museum",
+    "Hamngatan 4",
+    "1893",
+    "1898",
+    "1938",
+    "Isak Gustaf Clason",
+    "Five panorama views",
+    "Not an official Hallwyl Museum website.",
+  ])
+    assert.ok(html.includes(text), text);
+  assert.doesNotMatch(html, /Sunset Villa|bedrooms|bathrooms|Reference Realty/);
+  assert.equal(museumRooms.length, 4);
+  const credits = JSON.parse(
+    readFileSync(
+      new URL("../../../public/museum/credits.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  for (const room of museumRooms) {
+    const item = credits.find(
+      (x: { file: string }) => x.file === room.id + ".webp",
+    );
+    assert.equal(item.photographer, "Jan Ainali");
+    assert.equal(item.license, "CC BY-SA 4.0");
+    assert.match(item.source, /commons.wikimedia.org\/wiki\/File:/);
+    assert.ok(
+      readFileSync(
+        new URL("../../../public/museum/" + item.file, import.meta.url),
+      ).length < 300000,
+    );
+  }
+  const listing = await getViewerListing();
+  assert.equal(listing.publicId, HALLWYL_PUBLIC_ID);
+  assert.match(
+    listing.embedUrl,
+    new RegExp("/aw360/v/" + HALLWYL_PUBLIC_ID + "$"),
+  );
 });
