@@ -3,7 +3,7 @@ export const IMMERSIVE_SOURCE = "archwalk360-immersive";
 export type ImmersiveMessage = {
   source: typeof IMMERSIVE_SOURCE;
   version: 1;
-  type: "hello" | "ready" | "request" | "changed";
+  type: "hello" | "ready" | "request" | "changed" | "ping" | "pong";
   expanded: boolean;
 };
 export function immersiveMessage(
@@ -22,7 +22,9 @@ export function isImmersiveMessage(value: unknown): value is ImmersiveMessage {
     ) &&
     m.source === IMMERSIVE_SOURCE &&
     m.version === 1 &&
-    ["hello", "ready", "request", "changed"].includes(String(m.type)) &&
+    ["hello", "ready", "request", "changed", "ping", "pong"].includes(
+      String(m.type),
+    ) &&
     typeof m.expanded === "boolean"
   );
 }

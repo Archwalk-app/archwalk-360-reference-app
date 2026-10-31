@@ -8,7 +8,8 @@ import { immersiveMessage, isImmersiveMessage } from "@/lib/archwalk/immersive";
 export function ViewerEmbed({ src }: { src: string }) {
   const [expanded, setExpanded] = useState(false);
   const wrapper = useRef<HTMLDivElement>(null);
-  const exitButton = useRef<HTMLButtonElement>(null);
+  const [unresponsive, setUnresponsive] = useState(false);
+  const lastResponse = useRef(0);
   const previousFocus = useRef<HTMLElement | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const origin = new URL(src).origin;
@@ -26,7 +27,14 @@ export function ViewerEmbed({ src }: { src: string }) {
           immersiveMessage("ready"),
           origin,
         );
-      if (event.data.type === "request") setExpanded(event.data.expanded);
+      if (event.data.type === "pong") {
+        lastResponse.current = performance.now();
+        setUnresponsive(false);
+      }
+      if (event.data.type === "request") {
+        setUnresponsive(false);
+        setExpanded(event.data.expanded);
+      }
     }
     window.addEventListener("message", receive);
     function onLoad() {
@@ -83,12 +91,32 @@ export function ViewerEmbed({ src }: { src: string }) {
       }
       node = node.parentElement;
     }
-    exitButton.current?.focus({ preventScroll: true });
+    // Keep focus in the same Viewer so its exit toggle remains immediately usable.
+    iframeRef.current?.focus({ preventScroll: true });
+    lastResponse.current = performance.now();
+    const resume = () => {
+      lastResponse.current = performance.now();
+    };
+    document.addEventListener("visibilitychange", resume);
+    const heartbeat = window.setInterval(() => {
+      if (document.hidden) {
+        resume();
+        return;
+      }
+      if (performance.now() - lastResponse.current > 15000)
+        setUnresponsive(true);
+      iframeRef.current?.contentWindow?.postMessage(
+        immersiveMessage("ping", true),
+        origin,
+      );
+    }, 5000);
     const key = (event: KeyboardEvent) => {
       if (event.key === "Escape") setExpanded(false);
     };
     window.addEventListener("keydown", key);
     return () => {
+      window.clearInterval(heartbeat);
+      document.removeEventListener("visibilitychange", resume);
       document.body.style.overflow = overflow;
       restored.reverse().forEach((restore) => restore());
       window.removeEventListener("keydown", key);
@@ -108,32 +136,36 @@ export function ViewerEmbed({ src }: { src: string }) {
               inset: 0,
               zIndex: 1000,
               width: "100%",
+              margin: 0,
+              boxSizing: "border-box",
               height: "100dvh",
               background: "#191C1B",
-              padding:
-                "calc(env(safe-area-inset-top) + 52px) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)",
+              paddingTop: "env(safe-area-inset-top)",
+              paddingRight: "env(safe-area-inset-right)",
+              paddingBottom: unresponsive
+                ? "calc(env(safe-area-inset-bottom) + 44px)"
+                : "env(safe-area-inset-bottom)",
+              paddingLeft: "env(safe-area-inset-left)",
             }
           : undefined
       }
     >
-      {expanded ? (
+      {expanded && unresponsive ? (
         <button
-          ref={exitButton}
           type="button"
           onClick={() => setExpanded(false)}
           style={{
             position: "absolute",
-            right: "max(12px, env(safe-area-inset-right))",
-            top: "max(12px, env(safe-area-inset-top))",
-            zIndex: 1,
+            bottom: "env(safe-area-inset-bottom)",
+            left: 0,
+            width: "100%",
             minHeight: 44,
-            padding: "8px 16px",
-            background: "#FAF7EF",
-            color: "#292D24",
-            borderRadius: 8,
+            background: "#292D24",
+            color: "#FAF7EF",
+            fontSize: 12,
           }}
         >
-          Exit immersive view
+          Tour not responding? Exit immersive view
         </button>
       ) : null}
       <iframe
