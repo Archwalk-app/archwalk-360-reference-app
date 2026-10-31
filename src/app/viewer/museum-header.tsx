@@ -6,12 +6,12 @@ export function MuseumHeader() {
         <Link
           href="/viewer"
           className="museum-wordmark"
-          aria-label="Rooms in Time, Hallwyl Museum showcase"
+          aria-label="ArchWalk — Hallwyl Museum demo"
         >
-          Rooms<span>in Time</span>
+          ArchWalk
         </Link>
         <span className="museum-header-note">
-          Independent cultural journeys
+          Interactive 360° experiences
         </span>
         <nav aria-label="Exhibition navigation">
           <Link href="/viewer#rooms">The rooms</Link>

@@ -10,7 +10,7 @@ import {
   validDemoSession,
 } from "@/lib/demo-auth";
 export const metadata: Metadata = {
-  title: "Unlock demo | Rooms in Time",
+  title: "Unlock demo | ArchWalk 360",
   robots: { index: false, follow: false },
 };
 export default async function LoginPage({

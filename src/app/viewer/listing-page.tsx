@@ -146,9 +146,7 @@ export function ViewerListingPage({
       <footer className="museum-footer">
         <div className="museum-container">
           <div className="museum-footer-top">
-            <span className="museum-wordmark">
-              Rooms<span>in Time</span>
-            </span>
+            <span className="museum-wordmark">ArchWalk</span>
             <p>
               Independent interactive demonstration powered by ArchWalk 360. Not
               an official Hallwyl Museum website.

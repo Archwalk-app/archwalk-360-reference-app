@@ -1,6 +1,6 @@
-# Hallwyl Museum showcase
+# ArchWalk 360 reference demo
 
-`/viewer` is the independent **Rooms in Time** exhibition. `/editor` edits only the existing Hallwyl Experience; it does not create-or-resolve or overwrite Experiences. `/plugin` remains the separate Blue Lagoon demonstration with its existing identities and behavior.
+`/viewer` is the independent **Hallwyl Museum** exhibition, presented as an **ArchWalk 360** reference showcase. `/editor` edits only the existing Hallwyl Experience; it does not create-or-resolve or overwrite Experiences. `/plugin` remains the separate Blue Lagoon demonstration with its existing identities and behavior.
 
 Hallwyl’s production mapping was verified read-only: Item ID `sunset-villa-001`, Experience `166ac0f6-28c0-4858-92fc-f06243b0becc`, public ID `1e00029c-d4ff-4a22-8d5b-c95d10ae3f57`, no customer scope. Configure `HALLWYL_ITEM_ID` server-side if the connected ID changes; set `HALLWYL_CUSTOMER_ID` only for a customer-scoped connection. Incorrect mappings produce a non-destructive setup state. The public exhibition embeds the verified published public ID without requiring a Partner secret.
 

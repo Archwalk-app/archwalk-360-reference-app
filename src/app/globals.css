@@ -57,20 +57,14 @@ body {
   gap: 32px;
 }
 .museum-wordmark {
-  font-family: var(--font-source-serif), Georgia, serif;
-  font-size: 27px;
-  line-height: 0.95;
-  letter-spacing: -1px;
-  color: var(--foreground);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 26px;
+  font-weight: 750;
+  line-height: 1.1;
+  letter-spacing: -0.06em;
+  color: #44594c;
   text-decoration: none;
   flex-shrink: 0;
-}
-.museum-wordmark > span {
-  display: block;
-  padding-left: 26px;
-  font-style: italic;
-  font-size: 23px;
-  font-weight: 400;
 }
 .museum-header-note {
   margin-right: auto;
@@ -563,10 +557,6 @@ body {
   }
   .museum-wordmark {
     font-size: 24px;
-  }
-  .museum-wordmark > span {
-    font-size: 20px;
-    padding-left: 20px;
   }
   .museum-header nav {
     gap: 16px;
