@@ -6,9 +6,13 @@ test("gallery invitation, keyboard switch, cleanup and intentional deep link", a
   await page.setViewportSize({ width: 1440, height: 1080 });
   await page.goto("/viewer");
   const header = page.getByRole("banner");
-  await expect(header.getByRole("link", { name: "Visit ArchWalk main website" })).toHaveAttribute("href", "https://archwalk.app");
-  await expect(header.getByRole("img", { name: "ArchWalk" })).toBeVisible();
-  await expect(header.getByRole("navigation", { name: "Exhibition navigation" }).getByRole("link", { name: /Back to ArchWalk/ })).toHaveAttribute("href", "https://archwalk.app");
+  const homeLogo = header.getByRole("link", { name: "ArchWalk demo home" });
+  await expect(homeLogo).toHaveAttribute("href", "/viewer");
+  await expect(homeLogo.getByRole("img", { name: "ArchWalk" })).toBeVisible();
+  const externalSite = header.getByRole("navigation", { name: "Exhibition navigation" }).getByRole("link", { name: /Visit ArchWalk/ });
+  await expect(externalSite).toHaveAttribute("href", "https://archwalk.app");
+  await expect(externalSite).toHaveAttribute("target", "_blank");
+  await expect(externalSite).toHaveAttribute("rel", /noopener/);
   const photos = page.locator(".museum-photo-choice"),
     tour = page.locator(".museum-tour-action");
   await expect(photos).toHaveAttribute("aria-selected", "true");

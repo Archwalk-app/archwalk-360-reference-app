@@ -4,10 +4,10 @@ export function MuseumHeader() {
   return (
     <header className="museum-header">
       <div className="museum-container museum-header-inner">
-        <a
-          href="https://archwalk.app"
+        <Link
+          href="/viewer"
           className="museum-wordmark"
-          aria-label="Visit ArchWalk main website"
+          aria-label="ArchWalk demo home"
         >
           <Image
             src="/brand/archwalk-lockup-light.png"
@@ -17,7 +17,7 @@ export function MuseumHeader() {
             priority
             className="museum-brand-logo"
           />
-        </a>
+        </Link>
         <span className="museum-header-note">
           Interactive 360° experiences
         </span>
@@ -26,8 +26,13 @@ export function MuseumHeader() {
           <Link href="/viewer#about">The story</Link>
           <Link href="/viewer/credits">Credits</Link>
           <Link href="/plugin">Hotel demo</Link>
-          <a href="https://archwalk.app" className="museum-home-link">
-            Back to ArchWalk <span aria-hidden="true">↗</span>
+          <a
+            href="https://archwalk.app"
+            className="museum-home-link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Visit ArchWalk <span aria-hidden="true">↗</span>
           </a>
         </nav>
       </div>

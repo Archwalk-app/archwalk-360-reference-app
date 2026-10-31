@@ -146,10 +146,10 @@ export function ViewerListingPage({
       <footer className="museum-footer">
         <div className="museum-container">
           <div className="museum-footer-top">
-            <a
-              href="https://archwalk.app"
+            <Link
+              href="/viewer"
               className="museum-wordmark"
-              aria-label="Visit ArchWalk main website"
+              aria-label="ArchWalk demo home"
             >
               <Image
                 src="/brand/archwalk-lockup-light.png"
@@ -158,7 +158,7 @@ export function ViewerListingPage({
                 height={168}
                 className="museum-brand-logo"
               />
-            </a>
+            </Link>
             <p>
               Independent interactive demonstration powered by ArchWalk 360. Not
               an official Hallwyl Museum website.
