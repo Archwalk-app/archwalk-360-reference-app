@@ -5,9 +5,10 @@ test("gallery invitation, keyboard switch, cleanup and intentional deep link", a
 }) => {
   await page.setViewportSize({ width: 1440, height: 1080 });
   await page.goto("/viewer");
-  await expect(page.getByRole("banner").getByRole("link", { name: "ArchWalk — Hallwyl Museum demo" })).toBeVisible();
-  await expect(page.locator(".museum-wordmark").first()).toContainText("ArchWalk");
-  await expect(page.locator(".museum-wordmark").first()).not.toContainText("Rooms in Time");
+  const header = page.getByRole("banner");
+  await expect(header.getByRole("link", { name: "Visit ArchWalk main website" })).toHaveAttribute("href", "https://archwalk.app");
+  await expect(header.getByRole("img", { name: "ArchWalk" })).toBeVisible();
+  await expect(header.getByRole("navigation", { name: "Exhibition navigation" }).getByRole("link", { name: /Back to ArchWalk/ })).toHaveAttribute("href", "https://archwalk.app");
   const photos = page.locator(".museum-photo-choice"),
     tour = page.locator(".museum-tour-action");
   await expect(photos).toHaveAttribute("aria-selected", "true");

@@ -57,14 +57,24 @@ body {
   gap: 32px;
 }
 .museum-wordmark {
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  font-size: 26px;
-  font-weight: 750;
-  line-height: 1.1;
-  letter-spacing: -0.06em;
-  color: #44594c;
-  text-decoration: none;
+  display: inline-flex;
+  width: 168px;
+  align-items: center;
   flex-shrink: 0;
+  text-decoration: none;
+}
+.museum-brand-logo {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.museum-header nav .museum-home-link {
+  color: #44594c;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.museum-home-link > span {
+  margin-left: 3px;
 }
 .museum-header-note {
   margin-right: auto;
@@ -556,7 +566,7 @@ body {
     gap: 15px;
   }
   .museum-wordmark {
-    font-size: 24px;
+    width: 145px;
   }
   .museum-header nav {
     gap: 16px;
