@@ -46,7 +46,8 @@ export async function POST(request: Request) {
     const origin = parentOriginFromRequest(request);
     // A reference-site origin cannot serve /aw360/c/:id. Fail visibly rather
     // than silently embedding the reference app's Next.js 404 page.
-    if (new URL(client.config.appOrigin).origin === new URL(origin).origin) {
+    const creatorOrigin = new URL(client.config.appOrigin).origin;
+    if (creatorOrigin === new URL(origin).origin || creatorOrigin === new URL(request.url).origin) {
       return json(
         { error: "Creator host misconfigured: ARCHWALK_APP_ORIGIN points to this demo. Set it to the ArchWalk frontend (for production, https://archwalk.app) and redeploy." },
         503,
