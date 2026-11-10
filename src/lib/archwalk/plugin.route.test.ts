@@ -57,6 +57,7 @@ describe("plugin Partner routes", () => {
         visual_variant_count: number;
         variants: Array<{ id: string }>;
         create_or_resolve_calls?: number;
+        failed: number;
       };
       assert.equal(response.status, 200);
       assert.equal(body.physical_room_count, 18);
