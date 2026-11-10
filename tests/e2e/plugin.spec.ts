@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }) => {
   expect(response.ok()).toBe(true);
 });
 
-test("plugin dashboard maps 200 rooms to 8 variants without leaking the API key", async ({
+test("plugin concept lists sample room types without leaking the API key", async ({
   page,
 }) => {
   const scripts: string[] = [];
@@ -19,11 +19,11 @@ test("plugin dashboard maps 200 rooms to 8 variants without leaking the API key"
   });
   await page.goto("/plugin");
   await expect(
-    page.getByRole("heading", { name: "Blue Lagoon Resort" }),
+    page.getByRole("heading", { name: "Zesora Nathia Gali" }),
   ).toBeVisible();
-  await expect(page.getByText("200 rooms imported")).toBeVisible();
-  await expect(page.getByText("8 visual variants")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Edit 360" })).toHaveCount(8);
+  await expect(page.getByText("18 sample room IDs")).toBeVisible();
+  await expect(page.getByText("9 visual room types")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Edit 360" })).toHaveCount(9);
   await expect(page.getByRole("link", { name: "101" })).toBeVisible();
   await expect(page.getByRole("link", { name: "102" })).toBeVisible();
   const html = await page.content();
@@ -32,7 +32,7 @@ test("plugin dashboard maps 200 rooms to 8 variants without leaking the API key"
   expect(scripts.join("\n")).not.toContain("listing-browser-secret-sentinel");
 });
 
-test("Edit 360 uses the Creator handshake and publish updates Deluxe King", async ({
+test("Edit 360 uses the Creator handshake and publish updates Deluxe King Valley", async ({
   page,
 }) => {
   await page.goto("/plugin");
@@ -61,7 +61,7 @@ test("Edit 360 uses the Creator handshake and publish updates Deluxe King", asyn
   ).toBeVisible();
 });
 
-test("rooms 101 and 102 share the Deluxe King Viewer after publish", async ({
+test("sample rooms 101 and 102 share the Deluxe King Valley Viewer after publish", async ({
   page,
 }) => {
   await page.goto("/plugin");
@@ -91,9 +91,9 @@ test("rooms 101 and 102 share the Deluxe King Viewer after publish", async ({
 test("unconfigured host still shows imported inventory", async ({ page }) => {
   await page.goto("http://127.0.0.1:3003/plugin");
   await expect(
-    page.getByRole("heading", { name: "Blue Lagoon Resort" }),
+    page.getByRole("heading", { name: "Zesora Nathia Gali" }),
   ).toBeVisible();
-  await expect(page.getByText("200 rooms imported")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Edit 360" })).toHaveCount(8);
+  await expect(page.getByText("18 sample room IDs")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Edit 360" })).toHaveCount(9);
   await expect(page.locator("iframe")).toHaveCount(0);
 });
