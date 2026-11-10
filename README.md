@@ -9,7 +9,7 @@ Hallwyl’s production mapping was verified read-only: Item ID `sunset-villa-001
 - `HALLWYL_API_BASE=https://api.archwalk.app`
 - `HALLWYL_APP_ORIGIN=https://archwalk.app`
 - `HALLWYL_API_KEY`: the existing Hallwyl Integration’s server-side production credential, never `NEXT_PUBLIC_*`
-- `APP_ORIGIN=https://archwalk-360-reference-app.vercel.app` in Vercel; the exact local origin for local Creator testing must also be registered by the owner
+- `APP_ORIGIN=https://demo.archwalk.app` for the custom-domain Vercel demo (the origin actually used by visitors); if using a Vercel preview URL, that exact preview origin must also be registered separately
 - `HALLWYL_ITEM_ID=sunset-villa-001`; leave `HALLWYL_CUSTOMER_ID` unset for the verified mapping
 
 The credential needs `experiences:read`, `creator_sessions:issue` and the existing Creator action subset: `experiences:write`, `experiences:publish`, `panoramas:read`, `panoramas:write`, `panoramas:upload`. No credentials belong in Git. Vercel settings/deployment are owner-managed. `HALLWYL_VIEWER_ORIGIN` is an optional test-only Viewer origin override; production defaults to `https://archwalk.app`.
