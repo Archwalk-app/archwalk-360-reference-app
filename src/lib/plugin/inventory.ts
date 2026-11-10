@@ -1,18 +1,23 @@
+// Illustrative hotel integration concept. No claim is made about Zesora's real
+// room numbers, room-count distribution, or a live booking-system connection.
 export const PLUGIN_RESORT = {
-  id: "blue_lagoon",
-  name: "Blue Lagoon Resort",
-  location: "Coastal Maldives",
+  id: "zesora_concept_demo",
+  name: "Zesora Nathia Gali",
+  location: "Nathia Gali · Galiyat Hills",
 } as const;
 
+// Real public-facing room category names, but TWO FICTITIOUS room IDs per type
+// purely to demonstrate shared ArchWalk Experiences (18 sample IDs in total).
 export const PLUGIN_VARIANT_SPECS = [
-  { id: "deluxe_king", name: "Deluxe King", roomCount: 42 },
-  { id: "ocean_king", name: "Ocean King", roomCount: 31 },
-  { id: "garden_twin", name: "Garden Twin", roomCount: 28 },
-  { id: "executive_suite", name: "Executive Suite", roomCount: 22 },
-  { id: "family_suite", name: "Family Suite", roomCount: 24 },
-  { id: "accessible_king", name: "Accessible King", roomCount: 16 },
-  { id: "one_bedroom_villa", name: "One Bedroom Villa", roomCount: 20 },
-  { id: "two_bedroom_villa", name: "Two Bedroom Villa", roomCount: 17 },
+  { id: "deluxe_king", name: "Deluxe King Valley", roomCount: 2 },
+  { id: "deluxe_twin", name: "Deluxe Twin Valley", roomCount: 2 },
+  { id: "deluxe_interconnecting", name: "Deluxe Interconnecting Room", roomCount: 2 },
+  { id: "executive_king", name: "Executive King Valley", roomCount: 2 },
+  { id: "executive_twin", name: "Executive Twin Valley", roomCount: 2 },
+  { id: "executive_interconnecting", name: "Executive Interconnecting Room", roomCount: 2 },
+  { id: "standard_king", name: "Standard King Valley", roomCount: 2 },
+  { id: "standard_twin", name: "Standard Twin Valley", roomCount: 2 },
+  { id: "standard_interconnecting", name: "Standard Interconnecting Room", roomCount: 2 },
 ] as const;
 
 export type PluginStatus =
