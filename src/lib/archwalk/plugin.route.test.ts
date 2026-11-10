@@ -34,21 +34,15 @@ function assignEnv() {
 }
 
 describe("plugin Partner routes", () => {
-  it("auto-syncs eight variants and never returns the API key", async () => {
+  it("lists nine concept variants without creating a production Experience", async () => {
     const restore = assignEnv();
     const calls: unknown[] = [];
     globalThis.fetch = (async (_input, init) => {
-      const body = init?.body ? JSON.parse(String(init.body)) : null;
-      calls.push(body);
-      return Response.json({
-        experience_id: `exp_${body.external_resource_id}`,
-        public_id: `pub_${body.external_resource_id}`,
-        name: body.name,
-        external_resource_id: body.external_resource_id,
-        lifecycle_status: "active",
-        publication_status: "unpublished",
-        draft_revision: 1,
-      });
+      assert.equal(init?.method, "GET");
+      const url = new URL(String(_input));
+      calls.push(url.toString());
+      assert.equal(url.searchParams.get("external_customer_id"), "zesora_concept_demo");
+      return Response.json({ items: [] });
     }) as typeof fetch;
 
     try {
@@ -65,11 +59,12 @@ describe("plugin Partner routes", () => {
         create_or_resolve_calls?: number;
       };
       assert.equal(response.status, 200);
-      assert.equal(body.physical_room_count, 200);
-      assert.equal(body.visual_variant_count, 8);
-      assert.equal(body.variants.length, 8);
-      assert.equal(calls.length, 8);
+      assert.equal(body.physical_room_count, 18);
+      assert.equal(body.visual_variant_count, 9);
+      assert.equal(body.variants.length, 9);
+      assert.equal(calls.length, 9);
       assert.equal(body.create_or_resolve_calls, undefined);
+      assert.equal(body.failed, 0);
       assert.equal(JSON.stringify(body).includes("aw360_sk_"), false);
       assert.equal(JSON.stringify(body).includes("AW360_API_KEY"), false);
     } finally {
@@ -136,6 +131,26 @@ describe("plugin Partner routes", () => {
     } finally {
       restore();
     }
+  });
+
+  it("rejects a Creator host mistakenly configured to this demo origin", async () => {
+    const restore = assignEnv();
+    process.env.ARCHWALK_APP_ORIGIN = "http://localhost:3001";
+    let called = false;
+    globalThis.fetch = (async () => { called = true; throw new Error("Should not call API"); }) as typeof fetch;
+    try {
+      const response = await mintPluginSession(new Request(
+        "http://localhost:3001/api/archwalk/plugin/creator-session", {
+          method: "POST",
+          headers: { ...authHeaders(), "content-type": "application/json" },
+          body: JSON.stringify({ variantId: "deluxe_king" }),
+        },
+      ));
+      const body = await response.json();
+      assert.equal(response.status, 503);
+      assert.match(body.error, /ARCHWALK_APP_ORIGIN/);
+      assert.equal(called, false);
+    } finally { restore(); }
   });
 
   it("reuses one Experience/public_id for rooms 101 and 102", async () => {
