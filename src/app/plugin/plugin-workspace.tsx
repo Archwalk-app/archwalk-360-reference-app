@@ -244,23 +244,24 @@ export function PluginWorkspace() {
     <main className="mx-auto grid w-full max-w-[1600px] flex-1 gap-8 px-5 py-8 lg:grid-cols-[minmax(22rem,28rem)_minmax(0,1fr)] lg:items-start lg:px-8 lg:py-10">
       <section>
         <p className="text-xs font-medium tracking-[0.16em] text-accent uppercase">
-          Imported inventory
+          Illustrative sample inventory
         </p>
         <h1 className="mt-2 font-serif text-4xl tracking-tight">
-          {payload?.resort?.name ?? "Blue Lagoon Resort"}
+          {payload?.resort?.name ?? "Zesora Nathia Gali"}
         </h1>
         <p className="mt-2 text-sm text-muted">
-          {payload?.resort?.location ?? "Coastal Maldives"}
+          {payload?.resort?.location ?? "Nathia Gali · Galiyat Hills"}
         </p>
         <p className="mt-5 text-base leading-7 text-foreground">
           {payload
-            ? `${payload.physical_room_count} rooms imported · ${payload.visual_variant_count} visual variants · ${payload.visual_variant_count} ArchWalk Experiences`
-            : "Loading imported rooms…"}
+            ? `${payload.physical_room_count} sample room IDs · ${payload.visual_variant_count} visual room types · ${payload.visual_variant_count} possible ArchWalk Experiences`
+            : "Loading sample rooms…"}
         </p>
         <p className="mt-3 text-sm leading-6 text-muted">
-          Physical rooms stay in Reference Realty. ArchWalk maps each visually
-          distinct room type once. Rooms 101 and 102 are both Deluxe King, so
-          they share one published 360 experience.
+          Concept preview only — not Zesora's real booking inventory or an
+          official integration. Room numbers and counts are fictional examples.
+          ArchWalk maps each visually distinct room type once: sample rooms 101
+          and 102 both represent Deluxe King Valley and share one 360 experience.
         </p>
         {loadError ? (
           <p className="mt-3 text-sm text-red-800">{loadError}</p>
@@ -295,14 +296,14 @@ export function PluginWorkspace() {
                   }
                 >
                   <td className="px-3 py-3 font-medium">{variant.name}</td>
-                  <td className="px-3 py-3 text-muted">{variant.room_count}</td>
+                  <td className="px-3 py-3 text-muted">{variant.room_count}*</td>
                   <td className={`px-3 py-3 ${statusClass(variant.status)}`}>
                     {variant.status}
                   </td>
                   <td className="px-3 py-3 whitespace-nowrap">
                     <button
                       type="button"
-                      className="inline-flex min-h-11 items-center rounded-full bg-foreground px-3 text-xs font-medium text-background"
+                      className="inline-flex min-h-11 items-center rounded-full bg-foreground px-3 text-xs font-medium text-background hover:opacity-90"
                       onClick={() => {
                         openCreator(variant.id).catch((reason: unknown) => {
                           setEditorError(
@@ -331,6 +332,7 @@ export function PluginWorkspace() {
           </table>
         </div>
 
+        <p className="mt-3 text-xs leading-5 text-muted">* Fictional sample room IDs for a private demonstration, not Zesora room counts.</p>
         {deluxe ? (
           <p className="mt-4 text-sm text-muted">
             Guest rooms{" "}
@@ -347,12 +349,12 @@ export function PluginWorkspace() {
             >
               102
             </Link>{" "}
-            reuse the Deluxe King experience.
+            reuse the Deluxe King Valley example.
           </p>
         ) : null}
       </section>
 
-      <section className="border border-border bg-surface p-5 sm:p-6">
+      <section className="border border-border bg-surface p-5 shadow-[0_16px_40px_-30px_rgba(40,36,28,0.25)] sm:p-6">
         <p className="text-xs font-medium tracking-[0.16em] text-accent uppercase">
           ArchWalk 360
         </p>
@@ -361,8 +363,8 @@ export function PluginWorkspace() {
         </h2>
         <p className="mt-2 text-sm leading-6 text-muted">
           {selected
-            ? `${selected.room_count} physical rooms share this Experience. Upload, navigation, floor plan, and publish stay in Creator.`
-            : "Edit 360 opens ArchWalk Creator here. This page does not rebuild the editor."}
+            ? `${selected.room_count} illustrative sample rooms can share this Experience. Upload, navigation, floor plan, and publish stay in Creator.`
+            : "Edit 360 opens the real ArchWalk Creator. This preview does not copy or rebuild the editor."}
         </p>
         <p className="mt-2 text-xs text-muted">{editorStatus}</p>
         {editorError ? (
