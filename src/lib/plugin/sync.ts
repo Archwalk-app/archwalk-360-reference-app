@@ -29,7 +29,7 @@ export type PluginSyncResult = {
   visual_variant_count: number;
   synced: number;
   failed: number;
-  create_or_resolve_calls: number;
+  lookup_calls: number;
   variants: PluginVariantRow[];
 };
 
@@ -66,8 +66,9 @@ export async function syncPluginInventory(
   for (const variant of inventory.variants) {
     calls += 1;
     try {
-      const experience = await client.createOrResolveExperience({
-        name: variant.name,
+      // Dashboard reads must never create demo Experiences in production.
+      // Creation is limited to explicit Edit 360 actions.
+      const experience = await client.getExperienceByExternalId({
         external_resource_id: variant.external_resource_id,
         external_customer_id: variant.external_customer_id,
       });
@@ -86,8 +87,8 @@ export async function syncPluginInventory(
     physical_room_count: inventory.physical_room_count,
     visual_variant_count: inventory.visual_variant_count,
     synced: rows.filter((row) => row.ok).length,
-    failed: rows.filter((row) => !row.ok).length,
-    create_or_resolve_calls: calls,
+    failed: rows.filter((row) => row.status === "Needs attention").length,
+    lookup_calls: calls,
     variants: rows,
   };
 }
@@ -101,7 +102,7 @@ export function unsyncedPluginInventory(
     visual_variant_count: inventory.visual_variant_count,
     synced: 0,
     failed: 0,
-    create_or_resolve_calls: 0,
+    lookup_calls: 0,
     variants: inventory.variants.map((variant) =>
       toRow(variant, null, false, null),
     ),

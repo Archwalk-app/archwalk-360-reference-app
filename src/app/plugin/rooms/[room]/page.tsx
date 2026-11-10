@@ -48,11 +48,11 @@ export default async function PluginRoomPage({
   }
 
   return (
-    <div className="flex min-h-full flex-col">
+    <div className="hotel-demo flex min-h-full flex-col">
       <header className="border-b border-border bg-surface/80">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-5 sm:px-8">
           <Link href="/plugin" className="font-serif text-2xl tracking-tight">
-            Reference Realty<span className="text-accent">.</span>
+            ZESORA<span className="text-accent">.</span>
           </Link>
           <div>
             <p className="text-xs text-muted sm:text-sm">
@@ -64,7 +64,7 @@ export default async function PluginRoomPage({
       </header>
       <main className="mx-auto w-full max-w-7xl flex-1 px-5 pb-12 pt-7 sm:px-8 sm:pt-9">
         <p className="text-xs text-muted">
-          Guest room{" "}
+          Illustrative guest room{" "}
           <span aria-hidden className="mx-2">
             /
           </span>{" "}
@@ -74,8 +74,8 @@ export default async function PluginRoomPage({
           Room {found.room.room_number}
         </h1>
         <p className="mt-2 text-sm text-muted">
-          {found.variant.name} · {found.variant.room_count} matching rooms share
-          this 360 experience
+          {found.variant.name} · {found.variant.room_count} fictional sample rooms can share
+          one 360 experience
         </p>
         <p className="mt-4 text-sm text-muted">{statusLabel}</p>
         <div className="mt-6 min-h-[28rem] overflow-hidden border border-border bg-surface md:min-h-[36rem]">
@@ -90,14 +90,14 @@ export default async function PluginRoomPage({
           )}
         </div>
         <p className="mt-6 text-sm text-muted">
-          Rooms 101 and 102 are the same Deluxe King variant. After publish they
-          use the same Viewer.
+          Illustrative concept only, not Zesora's live booking inventory. Example
+          rooms 101 and 102 share the Deluxe King Valley Experience once published.
         </p>
         <Link
           href="/plugin"
           className="mt-6 inline-flex min-h-11 items-center text-sm underline underline-offset-4 hover:text-accent"
         >
-          Back to resort dashboard
+          Back to concept dashboard
         </Link>
       </main>
     </div>

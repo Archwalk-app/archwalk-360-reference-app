@@ -28,8 +28,8 @@ export default async function LoginPage({
         <p className="museum-eyebrow">A closer look, by invitation</p>
         <h1 className="mt-4 font-serif text-4xl">Welcome to the workspace.</h1>
         <p className="mb-8 mt-4 text-sm leading-7 text-muted">
-          One password unlocks the Hallwyl Museum Creator and the Blue Lagoon
-          hotel demo. The museum exhibition is always open to everyone.
+          One password unlocks the Hallwyl Museum Creator and the Zesora-inspired
+          hospitality concept demo. This is not a live Zesora integration. The museum exhibition is public.
         </p>
         <LoginForm returnTo={returnTo} configured={!!demoConfig()} />
       </main>

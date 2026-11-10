@@ -9,17 +9,19 @@ import {
 } from "./inventory";
 
 describe("plugin inventory", () => {
-  it("collapses 200 physical rooms into 8 visual variants", () => {
+  it("models 18 clearly fictional sample room IDs across 9 variants", () => {
     const inventory = buildPluginInventory();
-    assert.equal(inventory.physical_room_count, 200);
-    assert.equal(inventory.visual_variant_count, 8);
-    assert.equal(inventory.rooms.length, 200);
-    assert.equal(inventory.variants.length, 8);
+    assert.equal(inventory.physical_room_count, 18);
+    assert.equal(inventory.visual_variant_count, 9);
+    assert.equal(inventory.rooms.length, 18);
+    assert.equal(inventory.variants.length, 9);
     assert.equal(
       PLUGIN_VARIANT_SPECS.reduce((sum, spec) => sum + spec.roomCount, 0),
-      200,
+      18,
     );
     assert.ok(inventory.visual_variant_count < inventory.physical_room_count);
+    assert.equal(inventory.resort.external_customer_id, "zesora_concept_demo");
+    assert.equal(inventory.variants[0].name, "Deluxe King Valley");
     for (const room of inventory.rooms) {
       assert.equal(
         inventory.variants.some((variant) => variant.id === room.variant_id),
@@ -33,7 +35,7 @@ describe("plugin inventory", () => {
     assert.deepEqual(buildPluginInventory().rooms, inventory.rooms);
   });
 
-  it("maps rooms 101 and 102 to Deluxe King", () => {
+  it("maps fictional rooms 101 and 102 to Deluxe King Valley", () => {
     const inventory = buildPluginInventory();
     const first = findPluginRoom(inventory, "101");
     const second = findPluginRoom(inventory, "102");
