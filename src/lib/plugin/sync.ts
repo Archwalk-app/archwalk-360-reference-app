@@ -87,7 +87,7 @@ export async function syncPluginInventory(
     physical_room_count: inventory.physical_room_count,
     visual_variant_count: inventory.visual_variant_count,
     synced: rows.filter((row) => row.ok).length,
-    failed: rows.filter((row) => !row.ok).length,
+    failed: rows.filter((row) => row.status === "Needs attention").length,
     lookup_calls: calls,
     variants: rows,
   };
