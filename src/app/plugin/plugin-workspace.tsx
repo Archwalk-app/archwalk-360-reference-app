@@ -258,7 +258,7 @@ export function PluginWorkspace() {
             : "Loading sample rooms…"}
         </p>
         <p className="mt-3 text-sm leading-6 text-muted">
-          Concept preview only — not Zesora's real booking inventory or an
+          Concept preview only — not Zesora&apos;s real booking inventory or an
           official integration. Room numbers and counts are fictional examples.
           ArchWalk maps each visually distinct room type once: sample rooms 101
           and 102 both represent Deluxe King Valley and share one 360 experience.

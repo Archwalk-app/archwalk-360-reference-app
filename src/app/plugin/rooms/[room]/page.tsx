@@ -90,7 +90,7 @@ export default async function PluginRoomPage({
           )}
         </div>
         <p className="mt-6 text-sm text-muted">
-          Illustrative concept only, not Zesora's live booking inventory. Example
+          Illustrative concept only, not Zesora&apos;s live booking inventory. Example
           rooms 101 and 102 share the Deluxe King Valley Experience once published.
         </p>
         <Link

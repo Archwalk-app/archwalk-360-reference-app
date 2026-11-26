@@ -1,3 +1,5 @@
+"use client";
+import { trackDemoEvent } from "@/lib/demo-analytics";
 import Image from "next/image";
 import Link from "next/link";
 export function MuseumHeader() {
@@ -28,6 +30,7 @@ export function MuseumHeader() {
           <Link href="/plugin">Hotel demo</Link>
           <a
             href="https://archwalk.app"
+            onClick={() => trackDemoEvent("demo_return_to_website")}
             className="museum-home-link"
             target="_blank"
             rel="noopener noreferrer"

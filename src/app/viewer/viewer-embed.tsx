@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { viewerInitMessage } from "@/lib/archwalk/protocol";
+import { observeAnalyticsConsent } from "@/lib/analytics-runtime";
+import { createDemoEngagement } from "@/lib/demo-engagement";
+import { trackDemoEvent } from "@/lib/demo-analytics";
+import { parseViewerAnalyticsMessage, viewerInitMessage } from "@/lib/archwalk/protocol";
 
 import { immersiveMessage, isImmersiveMessage } from "@/lib/archwalk/immersive";
 
@@ -13,9 +16,25 @@ export function ViewerEmbed({ src }: { src: string }) {
   const previousFocus = useRef<HTMLElement | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const origin = new URL(src).origin;
+  const analytics = useRef<ReturnType<typeof createDemoEngagement> | null>(null);
+  useEffect(() => {
+    // Defer one microtask so React's development effect probe cannot duplicate starts.
+    let active = true;
+    const session = createDemoEngagement(trackDemoEvent);
+    analytics.current = session;
+    queueMicrotask(() => { if (active) session.start(); });
+    const unsubscribe = observeAnalyticsConsent(() => session.start());
+    return () => { active = false; unsubscribe(); analytics.current = null; };
+  }, [src]);
+
+  useEffect(() => {
+    analytics.current?.fullscreen(expanded, "immersive");
+  }, [expanded]);
 
   useEffect(() => {
     function receive(event: MessageEvent<unknown>) {
+      const message = parseViewerAnalyticsMessage(event, origin, iframeRef.current?.contentWindow);
+      if (message) analytics.current?.receive(message);
       if (
         event.source !== iframeRef.current?.contentWindow ||
         event.origin !== origin ||
@@ -50,7 +69,7 @@ export function ViewerEmbed({ src }: { src: string }) {
       node?.removeEventListener("load", onLoad);
       window.removeEventListener("message", receive);
     };
-  }, [origin]);
+  }, [origin, src]);
 
   useEffect(() => {
     iframeRef.current?.contentWindow?.postMessage(

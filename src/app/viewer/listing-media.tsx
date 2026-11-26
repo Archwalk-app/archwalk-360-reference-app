@@ -1,4 +1,5 @@
 "use client";
+import { trackDemoEvent } from "@/lib/demo-analytics";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { ViewerEmbed } from "./viewer-embed";
@@ -212,7 +213,10 @@ export function ListingMedia({
                     type="button"
                     aria-label={`View ${item.name} photograph`}
                     aria-pressed={selected === index}
-                    onClick={() => setSelected(index)}
+                    onClick={() => {
+                      if (index !== selected) trackDemoEvent("demo_photo_view", { scene_index: index });
+                      setSelected(index);
+                    }}
                   >
                     <span className="museum-thumb-image">
                       <Image
