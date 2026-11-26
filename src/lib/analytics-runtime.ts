@@ -99,6 +99,13 @@ export function pauseAnalytics() {
 export function setAnalyticsConsent(value: Exclude<AnalyticsConsent, null>) {
   if (!analyticsAllowed()) return;
   try {
+    // A demo-only acceptance cannot grant acquisition tracking. Withdrawal must
+    // revoke that separate scope too, so later demo acceptance cannot revive it.
+    if (value === "denied") {
+      document.cookie = "archwalk_acquisition_consent_v1=denied." + Date.now()
+        + "; Max-Age=15552000; Path=/; Domain=archwalk.app; Secure; SameSite=Lax";
+      document.cookie = "archwalk_acquisition_context_v1=; Max-Age=0; Path=/; Domain=archwalk.app; Secure; SameSite=Lax";
+    }
     document.cookie = ANALYTICS_CONSENT_KEY + "=" + value
       + "; Max-Age=15552000; Path=/; Domain=archwalk.app; Secure; SameSite=Lax";
   } catch { stopped = true; pauseAnalytics(); return; }

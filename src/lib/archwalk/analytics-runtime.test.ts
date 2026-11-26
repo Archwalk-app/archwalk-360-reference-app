@@ -136,3 +136,14 @@ test("a refused withdrawal write cannot reactivate an old stored grant", () => {
   assert.equal(doc.window["ga-disable-G-MZYPJQTCPJ"], true);
   assert.equal(doc.window.dataLayer, undefined);
 });
+
+test("demo withdrawal revokes acquisition scope and demo acceptance cannot revive it", () => {
+  const doc = documentAt(publicUrl);
+  doc.jar.set("archwalk_acquisition_consent_v1", "granted." + Date.now());
+  doc.jar.set("archwalk_acquisition_context_v1", "123.456.789");
+  doc.api.setAnalyticsConsent("denied");
+  assert.ok(doc.jar.get("archwalk_acquisition_consent_v1")?.startsWith("denied."));
+  assert.equal(doc.jar.has("archwalk_acquisition_context_v1"), false);
+  doc.api.setAnalyticsConsent("granted");
+  assert.ok(doc.jar.get("archwalk_acquisition_consent_v1")?.startsWith("denied."));
+});

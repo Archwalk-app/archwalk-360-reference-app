@@ -41,3 +41,5 @@ One signed HttpOnly session lasts eight hours across both demos. Changing either
 ## Public demo analytics
 
 Production GA4 uses the existing property `561759115` / `G-MZYPJQTCPJ`, with explicit consent covering marketing and demo, sanitized manual page views, and allowlisted viewer engagement. Set `NEXT_PUBLIC_GA_MEASUREMENT_ID` only for approved production builds (Vercel Production for demo). [Analytics configuration, event definitions, tests and coordinated release checklist](docs/analytics.md). Do not enable this release without reviewing the required Enhanced Measurement changes in that guide.
+
+Acquisition consent compatibility: declining analytics on the demo also revokes the separate marketing acquisition scope; accepting demo analytics alone never grants that scope. This compatibility change must accompany the marketing free-trial acquisition release.
