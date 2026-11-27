@@ -59,11 +59,11 @@ test("one password unlocks both Creators, preserves rooms, rejects CSRF and logs
   await expect(page).toHaveURL(origin + "/plugin/rooms/101");
   await page.getByRole("link", { name: "Hotel demo", exact: true }).click();
   await expect(
-    page.getByText("200 rooms imported", { exact: false }),
+    page.getByText("18 sample room IDs", { exact: false }),
   ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Edit 360", exact: true }),
-  ).toHaveCount(8);
+  ).toHaveCount(9);
   const before = await metrics(request);
   const csrf = await page.request.post("/api/archwalk/plugin", {
     headers: { Origin: "https://evil.example" },
